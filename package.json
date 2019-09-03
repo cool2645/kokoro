@@ -1,10 +1,12 @@
 {
   "name": "kokoro",
   "version": "0.0.1",
-  "description": "Music player written in React & Redux.",
+  "description": "Headless music player written with Redux.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build":  "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "standard"
   },
   "repository": {
     "type": "git",
@@ -18,5 +20,15 @@
   "bugs": {
     "url": "https://github.com/cool2645/kokoro/issues"
   },
-  "homepage": "https://github.com/cool2645/kokoro#readme"
+  "homepage": "https://github.com/cool2645/kokoro#readme",
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-loader": "^8.0.6",
+    "standard": "*",
+    "typedoc": "^0.15.0",
+    "typedoc-webpack-plugin": "^1.1.4",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7"
+  }
 }
