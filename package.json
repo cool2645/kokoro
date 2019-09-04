@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "description": "Headless music player written with Redux.",
   "main": "dist/kokoro.min.js",
+  "module": "dist/kokoro.esm.js",
   "scripts": {
     "develop": "webpack-dev-server --mode development",
-    "build": "webpack",
+    "build": "rollup -c && webpack",
     "version": "webpack",
     "test": "echo \\\"Error: no example specified\\\" && exit 1",
     "lint": "standard --fix",
@@ -34,6 +35,8 @@
     "jest": "^24.9.0",
     "pre-commit": "^1.2.2",
     "redux-devtools": "^3.5.0",
+    "rollup": "^1.20.3",
+    "rollup-plugin-babel": "^4.3.3",
     "standard": "*",
     "typedoc": "^0.15.0",
     "typedoc-webpack-plugin": "^1.1.4",
@@ -49,6 +52,10 @@
     "gitadd"
   ],
   "standard": {
-    "parser": "babel-eslint"
+    "parser": "babel-eslint",
+    "ignore": [
+      "/dist",
+      "/docs"
+    ]
   }
 }
