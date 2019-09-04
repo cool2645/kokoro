@@ -4,9 +4,12 @@
   "description": "Headless music player written with Redux.",
   "main": "index.js",
   "scripts": {
-    "build":  "webpack",
+    "develop": "webpack-dev-server --mode development",
+    "build": "webpack",
+    "version": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "standard"
+    "lint": "standard --fix",
+    "gitadd": "git add -A"
   },
   "repository": {
     "type": "git",
@@ -24,11 +27,23 @@
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
+    "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
+    "jest": "^24.9.0",
+    "pre-commit": "^1.2.2",
+    "redux-devtools": "^3.5.0",
     "standard": "*",
     "typedoc": "^0.15.0",
     "typedoc-webpack-plugin": "^1.1.4",
     "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.7"
-  }
+    "webpack-cli": "^3.3.7",
+    "webpack-dev-server": "^3.8.0"
+  },
+  "dependencies": {
+    "redux": "^4.0.4"
+  },
+  "pre-commit": [
+    "lint",
+    "gitadd"
+  ]
 }

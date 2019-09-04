@@ -1,17 +1,19 @@
 const path = require('path')
 const pkg = require('./package.json')
 const BannerPlugin = require('webpack').BannerPlugin
+const HotModuleReplacementPlugin = require('webpack').HotModuleReplacementPlugin
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin')
 
-module.exports = {
-  mode: 'production',
-  entry: path.join(__dirname, 'src', 'index.js'),
+module.exports = (env, argv) => ({
+  mode: argv.mode || 'production',
+  entry: argv.mode === 'development' ? path.join(__dirname, 'index.js')
+    : path.join(__dirname, 'src', 'index.js'),
   output: {
     library: 'kokoro',
     libraryTarget: 'umd',
     libraryExport: 'default',
     path: path.join(__dirname, 'dist'),
-    filename: 'kokoro.min.js'
+    filename: argv.mode === 'development' ? 'index.js' : 'kokoro.min.js'
   },
   module: {
     rules: [
@@ -22,21 +24,28 @@ module.exports = {
       }
     ]
   },
-  plugins: [
-    new BannerPlugin(`${pkg.name} - ${pkg.description}
+  plugins: argv.mode === 'development'
+    ? [
+      new HotModuleReplacementPlugin()
+    ] : [
+      new BannerPlugin(`${pkg.name} - ${pkg.description}
 --------
 @version ${pkg.version}
 @homepage: ${pkg.homepage}
 @license ${pkg.license}
 @author ${pkg.author}
 `),
-    new TypedocWebpackPlugin({
-      mode: 'file',
-      name: `Kokoro API v${pkg.version}`,
-      includeDeclarations: true,
-      out: '../docs',
-      readme: 'none'
-    })
-  ],
-  devtool: 'source-map'
-}
+      new TypedocWebpackPlugin({
+        mode: 'file',
+        name: `Kokoro API v${pkg.version}`,
+        includeDeclarations: true,
+        out: '../docs',
+        readme: 'none'
+      })
+    ],
+  devtool: argv.mode === 'development' ? 'eval' : 'source-map',
+  devServer: {
+    historyApiFallback: true,
+    hot: true
+  }
+})
