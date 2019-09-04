@@ -2,12 +2,12 @@
   "name": "kokoro",
   "version": "0.0.1",
   "description": "Headless music player written with Redux.",
-  "main": "index.js",
+  "main": "dist/kokoro.min.js",
   "scripts": {
     "develop": "webpack-dev-server --mode development",
     "build": "webpack",
     "version": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \\\"Error: no example specified\\\" && exit 1",
     "lint": "standard --fix",
     "gitadd": "git add -A"
   },
@@ -26,7 +26,9 @@
   "homepage": "https://github.com/cool2645/kokoro#readme",
   "devDependencies": {
     "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-export-namespace-from": "^7.5.2",
     "@babel/preset-env": "^7.5.5",
+    "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
     "jest": "^24.9.0",
@@ -45,5 +47,8 @@
   "pre-commit": [
     "lint",
     "gitadd"
-  ]
+  ],
+  "standard": {
+    "parser": "babel-eslint"
+  }
 }

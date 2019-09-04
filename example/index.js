@@ -1,3 +1,3 @@
-import Kokoro from './src'
+import Kokoro from '../src'
 
 window.player = new Kokoro()

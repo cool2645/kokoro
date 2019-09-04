@@ -6,7 +6,7 @@ const TypedocWebpackPlugin = require('typedoc-webpack-plugin')
 
 module.exports = (env, argv) => ({
   mode: argv.mode || 'production',
-  entry: argv.mode === 'development' ? path.join(__dirname, 'index.js')
+  entry: argv.mode === 'development' ? path.join(__dirname, 'example', 'index.js')
     : path.join(__dirname, 'src', 'index.js'),
   output: {
     library: 'kokoro',
@@ -43,9 +43,10 @@ module.exports = (env, argv) => ({
         readme: 'none'
       })
     ],
-  devtool: argv.mode === 'development' ? 'eval' : 'source-map',
+  devtool: argv.mode === 'development' ? 'eval-source-map' : 'source-map',
   devServer: {
     historyApiFallback: true,
-    hot: true
+    hot: true,
+    contentBase: path.join(__dirname, 'example')
   }
 })

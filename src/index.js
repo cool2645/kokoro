@@ -42,3 +42,5 @@ export const PLAY_ORDER = [
   PLAY_ORDER_RANDOM,
   PLAY_ORDER_SINGLE
 ]
+
+export * as actions from './actions'
