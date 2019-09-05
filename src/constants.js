@@ -1,0 +1,10 @@
+export const LYRICS_TYPE_LRC = 'lrc'
+export const LYRICS_TYPE_L2C = 'l2c'
+export const PLAY_ORDER_LOOP = 'PLAY_ORDER_LOOP'
+export const PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE'
+export const PLAY_ORDER_RANDOM = 'PLAY_ORDER_RANDOM'
+export const PLAY_ORDER = [
+  PLAY_ORDER_LOOP,
+  PLAY_ORDER_RANDOM,
+  PLAY_ORDER_SINGLE
+]

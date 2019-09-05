@@ -9,7 +9,7 @@
     "build": "rollup -c && webpack",
     "version": "webpack",
     "test": "echo \\\"Error: no example specified\\\" && exit 1",
-    "lint": "standard --fix",
+    "lint": "eslint --fix .",
     "gitadd": "git add -A"
   },
   "repository": {
@@ -32,12 +32,18 @@
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
+    "eslint": "^6.3.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "jest": "^24.9.0",
     "pre-commit": "^1.2.2",
     "redux-devtools": "^3.5.0",
     "rollup": "^1.20.3",
     "rollup-plugin-babel": "^4.3.3",
-    "standard": "*",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "typedoc": "^0.15.0",
     "typedoc-webpack-plugin": "^1.1.4",
     "webpack": "^4.39.3",
@@ -50,12 +56,5 @@
   "pre-commit": [
     "lint",
     "gitadd"
-  ],
-  "standard": {
-    "parser": "babel-eslint",
-    "ignore": [
-      "/dist",
-      "/docs"
-    ]
-  }
+  ]
 }

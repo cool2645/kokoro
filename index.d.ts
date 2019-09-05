@@ -105,7 +105,7 @@ export namespace actions {
   export function setCurrentSong (songOrIndex: Song | number): Action
   export function setNextSong (songOrIndex: Song | number): Action
   export function removeSong (songOrIndex: Song | number): Action
-  export function setPlaylist (playlist: Playlist): Action
+  export function setPlaylist (playlist: Playlist, currentSong: Song | number, playOrder?: PlayOrder): Action
   export function clearPlaylist (): Action
   export function setVolume (volume: number): Action
 

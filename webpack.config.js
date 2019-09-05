@@ -1,8 +1,10 @@
 const path = require('path')
-const pkg = require('./package.json')
+
 const BannerPlugin = require('webpack').BannerPlugin
 const HotModuleReplacementPlugin = require('webpack').HotModuleReplacementPlugin
 const TypedocWebpackPlugin = require('typedoc-webpack-plugin')
+
+const pkg = require('./package.json')
 
 module.exports = (env, argv) => ({
   mode: argv.mode || 'production',

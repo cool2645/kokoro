@@ -43,20 +43,52 @@ function _createClass(Constructor, protoProps, staticProps) {
   return Constructor;
 }
 
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+}
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) {
+    for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+    return arr2;
+  }
+}
+
+function _iterableToArray(iter) {
+  if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+}
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance");
+}
+
+var LYRICS_TYPE_LRC = 'lrc';
+var LYRICS_TYPE_L2C = 'l2c';
+var PLAY_ORDER_LOOP = 'PLAY_ORDER_LOOP';
+var PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE';
+var PLAY_ORDER_RANDOM = 'PLAY_ORDER_RANDOM';
+var PLAY_ORDER = [PLAY_ORDER_LOOP, PLAY_ORDER_RANDOM, PLAY_ORDER_SINGLE];
+
+var SET_VOLUME = 'SET_VOLUME';
+var SET_SPEED = 'SET_SPEED';
+function setVolume(volume) {
+  return {
+    type: SET_VOLUME,
+    payload: volume
+  };
+}
+function setSpeed(speed) {
+  return {
+    type: SET_SPEED,
+    payload: speed
+  };
+}
+
 var PAUSE = 'PAUSE';
 var PLAY = 'PLAY';
 var TOGGLE_PLAY = 'TOGGLE_PLAY';
-var NEXT = 'NEXT';
-var PREVIOUS = 'PREVIOUS';
 var SET_CURRENT_TIME = 'SET_CURRENT_TIME';
-var SET_PLAY_ORDER = 'SET_PLAY_ORDER';
-var NEXT_PLAY_ORDER = 'NEXT_PLAY_ORDER';
-var SET_CURRENT_SONG = 'SET_CURRENT_SONG';
-var SET_NEXT_SONG = 'SET_NEXT_SONG';
-var REMOVE_SONG = 'REMOVE_SONG';
-var SET_PLAYLIST = 'SET_PLAYLIST';
-var CLEAR_PLAYLIST = 'CLEAR_PLAYLIST';
-var SET_VOLUME = 'SET_VOLUME';
 function pause() {
   return {
     type: PAUSE
@@ -72,98 +104,42 @@ function togglePlay() {
     type: TOGGLE_PLAY
   };
 }
-function next() {
-  return {
-    type: NEXT
-  };
-}
-function previous() {
-  return {
-    type: PREVIOUS
-  };
-}
 function setCurrentTime(time) {
   return {
     type: SET_CURRENT_TIME,
     payload: time
   };
 }
-function setPlayOrder(playOrder) {
-  return {
-    type: SET_PLAY_ORDER,
-    payload: playOrder
-  };
-}
-function nextPlayOrder() {
-  return {
-    type: NEXT_PLAY_ORDER
-  };
-}
 
-function getSongSrcOrNull(song) {
-  return _typeof(song) === 'object' && song ? song.src instanceof Array ? song.src.length ? song.src[0] : null : song.src : song;
-}
+var SET_PLAYLIST = 'SET_PLAYLIST';
+var CLEAR_PLAYLIST = 'CLEAR_PLAYLIST';
+function setPlayOrder(playOrder) {}
+function nextPlayOrder() {}
+function setCurrentSong(songOrIndex) {}
+function setNextSong(songOrIndex) {}
+function removeSong(songOrIndex) {}
+function setPlaylist(playlist, currentSong, playOrder) {}
+function clearPlaylist() {}
+function next() {}
+function previous() {}
 
-function setCurrentSong(songOrIndex) {
-  var srcOrIndex = getSongSrcOrNull(songOrIndex);
-  return {
-    type: SET_CURRENT_SONG,
-    payload: srcOrIndex
-  };
-}
-function setNextSong(songOrIndex) {
-  var srcOrIndex = getSongSrcOrNull(songOrIndex);
-  return {
-    type: SET_NEXT_SONG,
-    payload: srcOrIndex
-  };
-}
-function removeSong(songOrIndex) {
-  var srcOrIndex = getSongSrcOrNull(songOrIndex);
-  return {
-    type: REMOVE_SONG,
-    payload: srcOrIndex
-  };
-}
-function setPlaylist(playlist) {
-  return {
-    type: SET_PLAYLIST,
-    payload: playlist
-  };
-}
-function clearPlaylist() {
-  return {
-    type: CLEAR_PLAYLIST
-  };
-}
-function setVolume(volume) {
-  return {
-    type: SET_VOLUME,
-    payload: volume
-  };
-}
 
-var actions = /*#__PURE__*/Object.freeze({
+
+var index = /*#__PURE__*/Object.freeze({
+  SET_VOLUME: SET_VOLUME,
+  SET_SPEED: SET_SPEED,
+  setVolume: setVolume,
+  setSpeed: setSpeed,
   PAUSE: PAUSE,
   PLAY: PLAY,
   TOGGLE_PLAY: TOGGLE_PLAY,
-  NEXT: NEXT,
-  PREVIOUS: PREVIOUS,
   SET_CURRENT_TIME: SET_CURRENT_TIME,
-  SET_PLAY_ORDER: SET_PLAY_ORDER,
-  NEXT_PLAY_ORDER: NEXT_PLAY_ORDER,
-  SET_CURRENT_SONG: SET_CURRENT_SONG,
-  SET_NEXT_SONG: SET_NEXT_SONG,
-  REMOVE_SONG: REMOVE_SONG,
-  SET_PLAYLIST: SET_PLAYLIST,
-  CLEAR_PLAYLIST: CLEAR_PLAYLIST,
-  SET_VOLUME: SET_VOLUME,
   pause: pause,
   play: play,
   togglePlay: togglePlay,
-  next: next,
-  previous: previous,
   setCurrentTime: setCurrentTime,
+  SET_PLAYLIST: SET_PLAYLIST,
+  CLEAR_PLAYLIST: CLEAR_PLAYLIST,
   setPlayOrder: setPlayOrder,
   nextPlayOrder: nextPlayOrder,
   setCurrentSong: setCurrentSong,
@@ -171,7 +147,123 @@ var actions = /*#__PURE__*/Object.freeze({
   removeSong: removeSong,
   setPlaylist: setPlaylist,
   clearPlaylist: clearPlaylist,
-  setVolume: setVolume
+  next: next,
+  previous: previous
+});
+
+var Song =
+/*#__PURE__*/
+function () {
+  function Song() {
+    _classCallCheck(this, Song);
+  }
+
+  _createClass(Song, null, [{
+    key: "id",
+    value: function id(song) {
+      Song.validate(song);
+      return song.src instanceof Array ? song.src[0] : song.src;
+    }
+  }, {
+    key: "validate",
+    value: function validate(song) {
+      if (!song || _typeof(song) !== 'object') {
+        throw new TypeError('song is not an object');
+      }
+
+      var src;
+
+      if (song.src instanceof Array) {
+        if (!song.src.length) {
+          throw new TypeError('invalid song object: src is an empty array');
+        }
+
+        src = song.src[0];
+      } else {
+        src = song.src;
+      }
+
+      if (typeof src !== 'string') {
+        throw new TypeError('invalid song object: src must be a string or string array');
+      }
+
+      if (!src) {
+        throw new TypeError('invalid song object: src cannot be an empty string');
+      }
+
+      return true;
+    }
+  }]);
+
+  return Song;
+}();
+
+var Playlist =
+/*#__PURE__*/
+function () {
+  function Playlist() {
+    _classCallCheck(this, Playlist);
+  }
+
+  _createClass(Playlist, null, [{
+    key: "validate",
+    value: function validate(playlist) {
+      if (!(playlist.playlist instanceof Array)) {
+        throw new TypeError('playlist must be an array');
+      }
+
+      if (!(playlist.randomPool instanceof Array)) {
+        throw new TypeError('randomPool must be an array');
+      }
+
+      if (!(playlist.coolDownPool instanceof Array)) {
+        throw new TypeError('coolDownPool must be an array');
+      }
+
+      var merged = [].concat(_toConsumableArray(playlist.randomPool), _toConsumableArray(playlist.coolDownPool)).sort(function (a, b) {
+        return Song.id(a).localeCompare(Song.id(b));
+      });
+
+      var original = _toConsumableArray(playlist.playlist).sort(function (a, b) {
+        return Song.id(a).localeCompare(Song.id(b));
+      });
+
+      if (merged.length !== original.length) {
+        throw new TypeError('the union of randomPool and cooldownPool must be exactly the same as playlist');
+      }
+
+      for (var i = 0; i < merged.length; i++) {
+        if (Song.id(merged[i]) !== Song.id(original[i])) {
+          throw new TypeError('the union of randomPool and cooldownPool must be exactly the same as playlist');
+        }
+      }
+
+      if (playlist.playlist.length) {
+        if (!playlist.playing) {
+          throw new TypeError('playing is required when playlist is non-empty');
+        }
+
+        Song.validate(playlist.playing);
+      } else {
+        if (playlist.playing) {
+          throw new TypeError('playing must be null when playlist is empty');
+        }
+      }
+
+      if (playlist.playOrder && _toConsumableArray(PLAY_ORDER).indexOf(playlist.playOrder) === -1) {
+        throw new TypeError('playOrder must be one of ' + PLAY_ORDER.toString());
+      }
+    }
+  }]);
+
+  return Playlist;
+}();
+
+
+
+var index$1 = /*#__PURE__*/Object.freeze({
+  Song: Song,
+  Playlist: Playlist
 });
 
 var defaultOptions = {
@@ -220,13 +312,7 @@ function () {
 
   return Kokoro;
 }();
-var LYRICS_TYPE_LRC = 'lrc';
-var LYRICS_TYPE_L2C = 'l2c';
-var PLAY_ORDER_LOOP = 'PLAY_ORDER_LOOP';
-var PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE';
-var PLAY_ORDER_RANDOM = 'PLAY_ORDER_RANDOM';
-var PLAY_ORDER = [PLAY_ORDER_LOOP, PLAY_ORDER_RANDOM, PLAY_ORDER_SINGLE];
 
 export default Kokoro;
-export { Kokoro, LYRICS_TYPE_L2C, LYRICS_TYPE_LRC, PLAY_ORDER, PLAY_ORDER_LOOP, PLAY_ORDER_RANDOM, PLAY_ORDER_SINGLE, actions };
+export { Kokoro, LYRICS_TYPE_L2C, LYRICS_TYPE_LRC, PLAY_ORDER, PLAY_ORDER_LOOP, PLAY_ORDER_RANDOM, PLAY_ORDER_SINGLE, index as actions, index$1 as helpers };
 //# sourceMappingURL=kokoro.esm.js.map
