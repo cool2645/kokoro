@@ -1,5 +1,6 @@
 import { applyMiddleware, createStore } from 'redux'
 import thunk from 'redux-thunk'
+import { composeWithDevTools } from 'redux-devtools-extension'
 
 import reducers from './reducers'
 
@@ -29,7 +30,7 @@ export class Kokoro {
     const op = Object.assign({}, defaultOptions, options)
     this._storageKey = op.storageKey
     this._mount(op.audioTagId)
-    this._store = createStore(reducers, applyMiddleware(thunk))
+    this._store = createStore(reducers, composeWithDevTools(applyMiddleware(thunk)))
     this._listeners = []
   }
 

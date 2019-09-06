@@ -9,6 +9,7 @@
  */
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import { cloneDeep } from 'lodash-es';
 
 function _classCallCheck(instance, Constructor) {
@@ -655,7 +656,7 @@ function () {
 
     this._mount(op.audioTagId);
 
-    this._store = createStore(reducers, applyMiddleware(thunk));
+    this._store = createStore(reducers, composeWithDevTools(applyMiddleware(thunk)));
     this._listeners = [];
   }
 
