@@ -7,6 +7,10 @@
  * @author rikakomoe
  *
  */
+import { combineReducers, createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import { cloneDeep } from 'lodash-es';
+
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -98,13 +102,6 @@ function _nonIterableSpread() {
   throw new TypeError("Invalid attempt to spread non-iterable instance");
 }
 
-var LYRICS_TYPE_LRC = 'lrc';
-var LYRICS_TYPE_L2C = 'l2c';
-var PLAY_ORDER_LOOP = 'PLAY_ORDER_LOOP';
-var PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE';
-var PLAY_ORDER_SHUFFLE = 'PLAY_ORDER_SHUFFLE';
-var PLAY_ORDER = [PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE];
-
 var SET_VOLUME = 'SET_VOLUME';
 var SET_SPEED = 'SET_SPEED';
 function setVolume(volume) {
@@ -145,6 +142,13 @@ function setCurrentTime(time) {
     payload: time
   };
 }
+
+var LYRICS_TYPE_LRC = 'lrc';
+var LYRICS_TYPE_L2C = 'l2c';
+var PLAY_ORDER_LOOP = 'PLAY_ORDER_LOOP';
+var PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE';
+var PLAY_ORDER_SHUFFLE = 'PLAY_ORDER_SHUFFLE';
+var PLAY_ORDER = [PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE];
 
 var SET_PLAYLIST = 'SET_PLAYLIST';
 var CLEAR_PLAYLIST = 'CLEAR_PLAYLIST';
@@ -511,6 +515,109 @@ var index = /*#__PURE__*/Object.freeze({
   clearPlaylist: clearPlaylist
 });
 
+var initialState = {
+  volume: 1,
+  speed: 1
+};
+function player () {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action) {
+    case SET_VOLUME:
+      if (typeof action.payload !== 'number') {
+        return state;
+      }
+
+      action.payload = Math.min(Math.max(action.payload, 0), 1);
+      return _objectSpread2({}, state, {
+        volume: action.payload
+      });
+
+    case SET_SPEED:
+      if (typeof action.payload !== 'number') {
+        return state;
+      }
+
+      action.payload = Math.min(Math.max(action.payload, 0), 1);
+      return _objectSpread2({}, state, {
+        speed: action.payload
+      });
+
+    default:
+      return state;
+  }
+}
+
+var initialState$1 = {
+  songs: {},
+  orderedList: [],
+  orderedIndexOfPlaying: null,
+  shuffledList: [],
+  shuffledIndexOfPlaying: null,
+  historyList: [],
+  playing: null,
+  playOrder: PLAY_ORDER_LOOP
+};
+function playlist () {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState$1;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action) {
+    case SET_PLAYLIST:
+      return cloneDeep(action.payload);
+
+    case CLEAR_PLAYLIST:
+      return _objectSpread2({}, initialState$1, {
+        playOrder: state.playOrder
+      });
+
+    default:
+      return state;
+  }
+}
+
+var initialState$2 = {
+  currentTime: 0,
+  totalTime: 0,
+  pause: false
+};
+function playing () {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState$2;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action) {
+    case SET_CURRENT_TIME:
+      return _objectSpread2({}, state, {
+        currentTime: action.payload
+      });
+
+    case PAUSE:
+      return _objectSpread2({}, state, {
+        pause: true
+      });
+
+    case PLAY:
+      return _objectSpread2({}, state, {
+        pause: false
+      });
+
+    case TOGGLE_PLAY:
+      return _objectSpread2({}, state, {
+        pause: !state.pause
+      });
+
+    default:
+      return state;
+  }
+}
+
+var reducers = combineReducers({
+  player: player,
+  playing: playing,
+  playlist: playlist
+});
+
 var defaultOptions = {
   storageKey: 'kokoro-store',
   audioTagId: 'kokoro-sevice'
@@ -523,6 +630,21 @@ function () {
     get: function get() {
       return this._ref;
     }
+  }, {
+    key: "store",
+    get: function get() {
+      return this._store;
+    }
+  }, {
+    key: "_dispatch",
+    get: function get() {
+      return this._store.dispatch;
+    }
+  }, {
+    key: "getState",
+    get: function get() {
+      return this._store.getState;
+    }
   }]);
 
   function Kokoro(options) {
@@ -532,6 +654,9 @@ function () {
     this._storageKey = op.storageKey;
 
     this._mount(op.audioTagId);
+
+    this._store = createStore(reducers, applyMiddleware(thunk));
+    this._listeners = [];
   }
 
   _createClass(Kokoro, [{
@@ -540,6 +665,44 @@ function () {
       this._destroyed = true;
 
       this._unmount();
+    }
+  }, {
+    key: "subscribe",
+    value: function subscribe(listener) {
+      var _this = this;
+
+      var o = this._listeners.find(function (item) {
+        return item.listener === listener;
+      });
+
+      if (o) {
+        return o.unsub;
+      }
+
+      var unsub = this._store.subscribe(function () {
+        return listener(_this.getState());
+      });
+
+      this._listeners.push({
+        listener: listener,
+        unsub: unsub
+      });
+
+      return unsub;
+    }
+  }, {
+    key: "unsubscribe",
+    value: function unsubscribe(listener) {
+      var o = this._listeners.find(function (item) {
+        return item.listener === listener;
+      });
+
+      if (o) {
+        o.unsub();
+        this._listeners = this._listeners.filter(function (item) {
+          return item.listener !== listener;
+        });
+      }
     }
   }, {
     key: "_mount",

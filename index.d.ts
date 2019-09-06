@@ -1,4 +1,5 @@
 import { ThunkAction } from 'redux-thunk'
+import { Dispatch, Store, Unsubscribe } from 'redux'
 
 export interface KokoroOptions {
   storageKey: string
@@ -9,14 +10,25 @@ export declare class Kokoro {
   private _ref: HTMLAudioElement
   private _storageKey: string
   private _destroyed?: true
+  private _store: Store<State>
+  private _listeners: {
+    listener: (state: State) => void
+    unsub: () => void
+  }[]
 
   readonly ref: HTMLAudioElement
+  readonly store: Store<State>
 
   private _mount (id?: string): void
   private _unmount (): void
 
+  protected _dispatch (): Dispatch
+
   constructor (options?: KokoroOptions)
   destroy (): void
+  subscribe (listener: (state: State) => void): Unsubscribe
+  unsubscribe (listener: (state: State) => void): void
+  getState (): State
 }
 
 export declare const LYRICS_TYPE_LRC = 'lrc'

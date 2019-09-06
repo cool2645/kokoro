@@ -5,7 +5,7 @@ import pkg from './package.json'
 
 export default {
   input: 'src/index.js',
-  external: ['redux'],
+  external: ['redux', 'redux-thunk', 'lodash-es'],
   output: [
     {
       file: pkg.module,

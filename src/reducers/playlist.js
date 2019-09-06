@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash'
+import { cloneDeep } from 'lodash-es'
 
 import { CLEAR_PLAYLIST, SET_PLAYLIST } from '../actions'
 import { PLAY_ORDER_LOOP } from '../constants'
