@@ -7,20 +7,6 @@
  * @author rikakomoe
  *
  */
-function _typeof(obj) {
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    _typeof = function (obj) {
-      return typeof obj;
-    };
-  } else {
-    _typeof = function (obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
-}
-
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -41,6 +27,55 @@ function _createClass(Constructor, protoProps, staticProps) {
   if (protoProps) _defineProperties(Constructor.prototype, protoProps);
   if (staticProps) _defineProperties(Constructor, staticProps);
   return Constructor;
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(source, true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(source).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
 }
 
 function _toConsumableArray(arr) {
@@ -67,8 +102,8 @@ var LYRICS_TYPE_LRC = 'lrc';
 var LYRICS_TYPE_L2C = 'l2c';
 var PLAY_ORDER_LOOP = 'PLAY_ORDER_LOOP';
 var PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE';
-var PLAY_ORDER_RANDOM = 'PLAY_ORDER_RANDOM';
-var PLAY_ORDER = [PLAY_ORDER_LOOP, PLAY_ORDER_RANDOM, PLAY_ORDER_SINGLE];
+var PLAY_ORDER_SHUFFLE = 'PLAY_ORDER_SHUFFLE';
+var PLAY_ORDER = [PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE];
 
 var SET_VOLUME = 'SET_VOLUME';
 var SET_SPEED = 'SET_SPEED';
@@ -113,15 +148,339 @@ function setCurrentTime(time) {
 
 var SET_PLAYLIST = 'SET_PLAYLIST';
 var CLEAR_PLAYLIST = 'CLEAR_PLAYLIST';
-function setPlayOrder(playOrder) {}
-function nextPlayOrder() {}
-function setCurrentSong(songOrIndex) {}
-function setNextSong(songOrIndex) {}
-function removeSong(songOrIndex) {}
-function setPlaylist(playlist, currentSong, playOrder) {}
-function clearPlaylist() {}
-function next() {}
-function previous() {}
+
+function shuffle(original) {
+  var shuffled = _toConsumableArray(original);
+
+  shuffled.sort(function () {
+    return Math.random() - 0.5;
+  });
+  return shuffled;
+}
+
+function createSetPlaylistAction(payload) {
+  return {
+    type: SET_PLAYLIST,
+    payload: payload
+  };
+}
+
+function pushHistory(historyList, song) {
+  var newHistoryList = _toConsumableArray(historyList);
+
+  var historyIndex = historyList.indexOf(song);
+
+  if (historyIndex !== -1) {
+    newHistoryList.splice(historyIndex, 1);
+  }
+
+  newHistoryList.unshift(song);
+  return newHistoryList;
+}
+
+function id(song) {
+  return song.src instanceof Array ? song.src[0] : song.src;
+}
+
+function setPlayOrder(playOrder) {
+  return function (dispatch, getState) {
+    var _getState = getState(),
+        playlist = _getState.playlist;
+
+    var newPlaylistState = _objectSpread2({}, playlist, {
+      playOrder: playOrder
+    });
+
+    if (playOrder === PLAY_ORDER_SHUFFLE) {
+      var shuffledList = shuffle(playlist.orderedList);
+      var shuffledIndexOfPlaying = shuffledList.indexOf(playlist.playing);
+      newPlaylistState.shuffledList = shuffledList;
+      newPlaylistState.shuffledIndexOfPlaying = shuffledIndexOfPlaying;
+    }
+
+    dispatch(createSetPlaylistAction(newPlaylistState));
+  };
+}
+function nextPlayOrder() {
+  return function (dispatch, getState) {
+    var _getState2 = getState(),
+        playlist = _getState2.playlist;
+
+    var currentPlayOrder = playlist.playOrder;
+    var currentPlayOrderIndex = PLAY_ORDER.indexOf(currentPlayOrder);
+    var nextPlayOrderIndex = currentPlayOrderIndex + 1 >= PLAY_ORDER.length ? 0 : currentPlayOrderIndex + 1;
+    var nextPlayOrder = PLAY_ORDER[nextPlayOrderIndex];
+    setPlayOrder(nextPlayOrder)(dispatch, getState);
+  };
+}
+function next() {
+  return function (dispatch, getState) {
+    var _getState3 = getState(),
+        playlist = _getState3.playlist;
+
+    var newPlaylistState = _objectSpread2({}, playlist);
+
+    if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
+      if (playlist.shuffledIndexOfPlaying + 1 === playlist.shuffledList.length) {
+        var _newPlaylistState$shu;
+
+        (_newPlaylistState$shu = newPlaylistState.shuffledList).push.apply(_newPlaylistState$shu, _toConsumableArray(shuffle(playlist.orderedList)));
+      }
+
+      newPlaylistState.shuffledIndexOfPlaying++;
+      newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying];
+      newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing);
+    } else {
+      if (playlist.orderedIndexOfPlaying + 1 === playlist.orderedList.length) {
+        newPlaylistState.orderedIndexOfPlaying = 0;
+      } else {
+        newPlaylistState.orderedIndexOfPlaying++;
+      }
+
+      newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
+    }
+
+    newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
+    dispatch(createSetPlaylistAction(newPlaylistState));
+  };
+}
+function autoNext() {
+  return function (dispatch, getState) {
+    var _getState4 = getState(),
+        playlist = _getState4.playlist;
+
+    if (playlist.playOrder === PLAY_ORDER_SINGLE) {
+      dispatch(createSetPlaylistAction(playlist));
+    } else {
+      next()(dispatch, getState);
+    }
+  };
+}
+function previous() {
+  return function (dispatch, getState) {
+    var _getState5 = getState(),
+        playlist = _getState5.playlist;
+
+    var newPlaylistState = _objectSpread2({}, playlist);
+
+    if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
+      if (playlist.shuffledIndexOfPlaying - 1 === -1) {
+        var _newPlaylistState$shu2;
+
+        (_newPlaylistState$shu2 = newPlaylistState.shuffledList).unshift.apply(_newPlaylistState$shu2, _toConsumableArray(shuffle(playlist.orderedList)));
+
+        newPlaylistState.shuffledIndexOfPlaying += playlist.orderedList;
+      }
+
+      newPlaylistState.shuffledIndexOfPlaying--;
+      newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying];
+      newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing);
+    } else {
+      if (playlist.orderedIndexOfPlaying - 1 === -1) {
+        newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.length - 1;
+      } else {
+        newPlaylistState.orderedIndexOfPlaying--;
+      }
+
+      newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
+    }
+
+    newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
+    dispatch(createSetPlaylistAction(newPlaylistState));
+  };
+}
+function setCurrentSong(song) {
+  return function (dispatch, getState) {
+    var _getState6 = getState(),
+        playlist = _getState6.playlist;
+
+    var newPlaylistState = _objectSpread2({}, playlist);
+
+    var songId;
+
+    if (typeof song === 'number') {
+      songId = playlist.orderedList[song];
+    } else if (typeof song === 'string') {
+      songId = song;
+    } else {
+      songId = id(song);
+      newPlaylistState.songs[songId] = song;
+
+      if (playlist.orderedList.indexOf(songId) === -1) {
+        newPlaylistState.orderedList.splice(newPlaylistState.orderedIndexOfPlaying + 1, 0, songId);
+      }
+    }
+
+    newPlaylistState.playing = songId;
+    newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(songId);
+
+    if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
+      newPlaylistState.shuffledList = shuffle(newPlaylistState.orderedList);
+      newPlaylistState.shuffledIndexOfPlaying = newPlaylistState.shuffledList.indexOf(songId);
+    }
+
+    newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
+    dispatch(createSetPlaylistAction(newPlaylistState));
+  };
+}
+function setNextSong(song) {
+  return function (dispatch, getState) {
+    var _getState7 = getState(),
+        playlist = _getState7.playlist;
+
+    var newPlaylistState = _objectSpread2({}, playlist);
+
+    var songId;
+
+    if (typeof song === 'number') {
+      songId = playlist.orderedList[song];
+    } else if (typeof song === 'string') {
+      songId = song;
+    } else {
+      songId = id(song);
+      newPlaylistState.songs[songId] = song;
+    }
+
+    if (songId !== playlist.playing) {
+      var orderedIndex = playlist.orderedList.indexOf(songId);
+
+      if (orderedIndex !== -1) {
+        newPlaylistState.orderedList.splice(orderedIndex, 1);
+      }
+
+      newPlaylistState.orderedList.splice(newPlaylistState.orderedIndexOfPlaying + 1, 0, songId);
+
+      if (playlist.playOrder === PLAY_ORDER_SHUFFLE && !(playlist.shuffledIndexOfPlaying + 1 < playlist.shuffledList.length && playlist.shuffledList[playlist.shuffledIndexOfPlaying + 1] === songId)) {
+        newPlaylistState.shuffledList.splice(playlist.shuffledIndexOfPlaying + 1, 0, songId);
+      }
+    }
+
+    dispatch(createSetPlaylistAction(newPlaylistState));
+  };
+}
+function removeSong(song) {
+  return function (dispatch, getState) {
+    var _getState8 = getState(),
+        playlist = _getState8.playlist;
+
+    var newPlaylistState = _objectSpread2({}, playlist);
+
+    var songId;
+
+    if (typeof song === 'number') {
+      songId = playlist.orderedList[song];
+    } else if (typeof song === 'string') {
+      songId = song;
+    } else {
+      songId = id(song);
+    }
+
+    var orderedIndexReduction = playlist.orderedList.slice(0, playlist.orderedIndexOfPlaying).filter(function (item) {
+      return item === songId;
+    }).length;
+    newPlaylistState.orderedList = playlist.orderedList.filter(function (item) {
+      return item !== songId;
+    });
+
+    if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
+      var shuffledIndexReduction = playlist.shuffledList.slice(0, playlist.shuffledIndexOfPlaying).filter(function (item) {
+        return item === songId;
+      }).length;
+      newPlaylistState.shuffledList = playlist.shuffledList.filter(function (item) {
+        return item !== songId;
+      });
+      newPlaylistState.shuffledIndexOfPlaying = playlist.shuffledIndexOfPlaying - shuffledIndexReduction;
+      newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.indexOf(newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying]);
+    } else {
+      newPlaylistState.orderedIndexOfPlaying = playlist.orderedIndexOfPlaying - orderedIndexReduction;
+    }
+
+    newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
+    newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
+    dispatch(createSetPlaylistAction(newPlaylistState));
+  };
+}
+function setPlaylist(songs, currentSong, playOrder) {
+  return function (dispatch, getState) {
+    var _getState9 = getState(),
+        playlist = _getState9.playlist;
+
+    var newPlaylistState = _objectSpread2({}, playlist, {
+      songs: {},
+      orderedList: [],
+      orderedIndexOfPlaying: null,
+      shuffledList: [],
+      shuffledIndexOfPlaying: null,
+      playing: null,
+      playOrder: playOrder || playlist.playOrder
+    });
+
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = songs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var song = _step.value;
+
+        var _songId = id(song);
+
+        newPlaylistState.songs[_songId] = song;
+        newPlaylistState.orderedList.push(_songId);
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+          _iterator["return"]();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    if (newPlaylistState.orderedList.length) {
+      if (currentSong) {
+        var songId;
+
+        if (typeof currentSong === 'number') {
+          songId = newPlaylistState.orderedList[currentSong];
+        } else if (typeof currentSong === 'string') {
+          songId = currentSong;
+        } else {
+          songId = id(currentSong);
+        }
+
+        newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.indexOf(songId);
+
+        if (newPlaylistState.playOrder === PLAY_ORDER_SHUFFLE) {
+          newPlaylistState.shuffledList = shuffle(newPlaylistState.orderedList);
+          newPlaylistState.shuffledIndexOfPlaying = newPlaylistState.shuffledList.indexOf(songId);
+          newPlaylistState.playing = songId;
+        }
+      } else {
+        if (newPlaylistState.playOrder === PLAY_ORDER_SHUFFLE) {
+          newPlaylistState.shuffledList = shuffle(newPlaylistState.orderedList);
+          newPlaylistState.shuffledIndexOfPlaying = 0;
+          newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying];
+          newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.indexOf(newPlaylistState.playing);
+        } else {
+          newPlaylistState.orderedIndexOfPlaying = 0;
+          newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
+        }
+      }
+    }
+  };
+}
+function clearPlaylist() {
+  return {
+    type: CLEAR_PLAYLIST
+  };
+}
 
 
 
@@ -142,128 +501,14 @@ var index = /*#__PURE__*/Object.freeze({
   CLEAR_PLAYLIST: CLEAR_PLAYLIST,
   setPlayOrder: setPlayOrder,
   nextPlayOrder: nextPlayOrder,
+  next: next,
+  autoNext: autoNext,
+  previous: previous,
   setCurrentSong: setCurrentSong,
   setNextSong: setNextSong,
   removeSong: removeSong,
   setPlaylist: setPlaylist,
-  clearPlaylist: clearPlaylist,
-  next: next,
-  previous: previous
-});
-
-var Song =
-/*#__PURE__*/
-function () {
-  function Song() {
-    _classCallCheck(this, Song);
-  }
-
-  _createClass(Song, null, [{
-    key: "id",
-    value: function id(song) {
-      Song.validate(song);
-      return song.src instanceof Array ? song.src[0] : song.src;
-    }
-  }, {
-    key: "validate",
-    value: function validate(song) {
-      if (!song || _typeof(song) !== 'object') {
-        throw new TypeError('song is not an object');
-      }
-
-      var src;
-
-      if (song.src instanceof Array) {
-        if (!song.src.length) {
-          throw new TypeError('invalid song object: src is an empty array');
-        }
-
-        src = song.src[0];
-      } else {
-        src = song.src;
-      }
-
-      if (typeof src !== 'string') {
-        throw new TypeError('invalid song object: src must be a string or string array');
-      }
-
-      if (!src) {
-        throw new TypeError('invalid song object: src cannot be an empty string');
-      }
-
-      return true;
-    }
-  }]);
-
-  return Song;
-}();
-
-var Playlist =
-/*#__PURE__*/
-function () {
-  function Playlist() {
-    _classCallCheck(this, Playlist);
-  }
-
-  _createClass(Playlist, null, [{
-    key: "validate",
-    value: function validate(playlist) {
-      if (!(playlist.playlist instanceof Array)) {
-        throw new TypeError('playlist must be an array');
-      }
-
-      if (!(playlist.randomPool instanceof Array)) {
-        throw new TypeError('randomPool must be an array');
-      }
-
-      if (!(playlist.coolDownPool instanceof Array)) {
-        throw new TypeError('coolDownPool must be an array');
-      }
-
-      var merged = [].concat(_toConsumableArray(playlist.randomPool), _toConsumableArray(playlist.coolDownPool)).sort(function (a, b) {
-        return Song.id(a).localeCompare(Song.id(b));
-      });
-
-      var original = _toConsumableArray(playlist.playlist).sort(function (a, b) {
-        return Song.id(a).localeCompare(Song.id(b));
-      });
-
-      if (merged.length !== original.length) {
-        throw new TypeError('the union of randomPool and cooldownPool must be exactly the same as playlist');
-      }
-
-      for (var i = 0; i < merged.length; i++) {
-        if (Song.id(merged[i]) !== Song.id(original[i])) {
-          throw new TypeError('the union of randomPool and cooldownPool must be exactly the same as playlist');
-        }
-      }
-
-      if (playlist.playlist.length) {
-        if (!playlist.playing) {
-          throw new TypeError('playing is required when playlist is non-empty');
-        }
-
-        Song.validate(playlist.playing);
-      } else {
-        if (playlist.playing) {
-          throw new TypeError('playing must be null when playlist is empty');
-        }
-      }
-
-      if (playlist.playOrder && _toConsumableArray(PLAY_ORDER).indexOf(playlist.playOrder) === -1) {
-        throw new TypeError('playOrder must be one of ' + PLAY_ORDER.toString());
-      }
-    }
-  }]);
-
-  return Playlist;
-}();
-
-
-
-var index$1 = /*#__PURE__*/Object.freeze({
-  Song: Song,
-  Playlist: Playlist
+  clearPlaylist: clearPlaylist
 });
 
 var defaultOptions = {
@@ -314,5 +559,5 @@ function () {
 }();
 
 export default Kokoro;
-export { Kokoro, LYRICS_TYPE_L2C, LYRICS_TYPE_LRC, PLAY_ORDER, PLAY_ORDER_LOOP, PLAY_ORDER_RANDOM, PLAY_ORDER_SINGLE, index as actions, index$1 as helpers };
+export { Kokoro, LYRICS_TYPE_L2C, LYRICS_TYPE_LRC, PLAY_ORDER, PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE, index as actions };
 //# sourceMappingURL=kokoro.esm.js.map

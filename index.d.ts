@@ -1,3 +1,5 @@
+import { ThunkAction } from 'redux-thunk'
+
 export interface KokoroOptions {
   storageKey: string
   audioTagId: string
@@ -47,66 +49,79 @@ export interface Song {
   lyrics?: Lyrics
 }
 
-export interface Playlist {
-  name: string
-  cover: string
-  description: string
-  songs: Song[]
-}
-
 export declare const PLAY_ORDER_LOOP = 'PLAY_ORDER_LOOP'
 export declare const PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE'
-export declare const PLAY_ORDER_RANDOM = 'PLAY_ORDER_RANDOM'
+export declare const PLAY_ORDER_SHUFFLE = 'PLAY_ORDER_SHUFFLE'
 export declare const PLAY_ORDER: string[]
 export type PlayOrder =
   | typeof PLAY_ORDER_LOOP
   | typeof PLAY_ORDER_SINGLE
-  | typeof PLAY_ORDER_RANDOM
+  | typeof PLAY_ORDER_SHUFFLE
 
 export default Kokoro
+
+export interface PlayerState {
+  volume: number
+  speed: number
+}
+
+export interface PlayingState {
+  song: Song
+  currentTime: number
+  totalTime: number
+  pause: boolean
+}
+
+export interface PlaylistState {
+  songs: { [key: string]: Song }
+  orderedList: string[]
+  orderedIndexOfPlaying: number | null
+  shuffledList: string[]
+  shuffledIndexOfPlaying: number | null
+  historyList: string[]
+  playing: string | null
+  playOrder: PlayOrder
+}
+
+export interface State {
+  player: PlayerState
+  playing: PlayingState
+  playlist: PlaylistState
+}
 
 export namespace actions {
 
   export const PAUSE = 'PAUSE'
   export const PLAY = 'PLAY'
   export const TOGGLE_PLAY = 'TOGGLE_PLAY'
-  export const NEXT = 'NEXT'
-  export const PREVIOUS = 'PREVIOUS'
-
   export const SET_CURRENT_TIME = 'SET_CURRENT_TIME'
 
-  export const SET_PLAY_ORDER = 'SET_PLAY_ORDER'
-  export const NEXT_PLAY_ORDER = 'NEXT_PLAY_ORDER'
-
-  export const SET_CURRENT_SONG = 'SET_CURRENT_SONG'
-  export const SET_NEXT_SONG = 'SET_NEXT_SONG'
-
-  export const REMOVE_SONG = 'REMOVE_SONG'
-  export const REORDER_PLAYLIST = 'REORDER_PLAYLIST'
   export const SET_PLAYLIST = 'SET_PLAYLIST'
   export const CLEAR_PLAYLIST = 'CLEAR_PLAYLIST'
 
   export const SET_VOLUME = 'SET_VOLUME'
   export const SET_SPEED = 'SET_SPEED'
 
-  export interface Action {
-    type: string
-    payload?: any
+  export interface Action<T, P> {
+    type: T
+    payload: P
   }
 
-  export function pause (): Action
-  export function play (): Action
-  export function togglePlay (): Action
-  export function next (): Action
-  export function previous (): Action
-  export function setCurrentTime (time: number): Action
-  export function setPlayOrder (playOrder: PlayOrder): Action
-  export function nextPlayOrder (): Action
-  export function setCurrentSong (songOrIndex: Song | number): Action
-  export function setNextSong (songOrIndex: Song | number): Action
-  export function removeSong (songOrIndex: Song | number): Action
-  export function setPlaylist (playlist: Playlist, currentSong: Song | number, playOrder?: PlayOrder): Action
-  export function clearPlaylist (): Action
-  export function setVolume (volume: number): Action
+  export function pause (): Action<typeof PAUSE, undefined>
+  export function play (): Action<typeof PLAY, undefined>
+  export function togglePlay (): Action<typeof TOGGLE_PLAY, undefined>
+  export function setCurrentTime (time: number): Action<typeof SET_CURRENT_TIME, number>
+  export function next (): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
+  export function autoNext (): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
+  export function previous (): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
+  export function setPlayOrder (playOrder: PlayOrder): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
+  export function nextPlayOrder (): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
+  export function setCurrentSong (song: Song | number | string): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
+  export function setNextSong (song: Song | number | string): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
+  export function removeSong (song: Song | number | string): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
+  export function setPlaylist (songs: Song[], currentSong?: Song | number | string, playOrder?: PlayOrder): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
+  export function clearPlaylist (): Action<typeof CLEAR_PLAYLIST, undefined>
+  export function setVolume (volume: number): Action<typeof SET_VOLUME, number>
+  export function setSpeed (speed: number): Action<typeof SET_SPEED, number>
 
 }
