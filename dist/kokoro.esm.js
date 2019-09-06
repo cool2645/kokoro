@@ -124,6 +124,7 @@ var TOGGLE_PLAY = 'TOGGLE_PLAY';
 var SET_CURRENT_TIME = 'SET_CURRENT_TIME';
 var SET_TOTAL_TIME = 'SET_TOTAL_TIME';
 var SET_BUFFERED_TIME = 'SET_BUFFERED_TIME';
+var SET_TIMES = 'SET_TIMES';
 var NEXT_SRC = 'NEXT_SRC';
 function pause() {
   return {
@@ -156,6 +157,12 @@ function setBufferedTime(buffered) {
   return {
     type: SET_BUFFERED_TIME,
     payload: buffered
+  };
+}
+function setTimes(times) {
+  return {
+    type: SET_TIMES,
+    payload: times
   };
 }
 function nextSrc() {
@@ -520,6 +527,7 @@ var index = /*#__PURE__*/Object.freeze({
   SET_CURRENT_TIME: SET_CURRENT_TIME,
   SET_TOTAL_TIME: SET_TOTAL_TIME,
   SET_BUFFERED_TIME: SET_BUFFERED_TIME,
+  SET_TIMES: SET_TIMES,
   NEXT_SRC: NEXT_SRC,
   pause: pause,
   play: play,
@@ -527,6 +535,7 @@ var index = /*#__PURE__*/Object.freeze({
   setCurrentTime: setCurrentTime,
   setTotalTime: setTotalTime,
   setBufferedTime: setBufferedTime,
+  setTimes: setTimes,
   nextSrc: nextSrc,
   SET_PLAYLIST: SET_PLAYLIST,
   CLEAR_PLAYLIST: CLEAR_PLAYLIST,
@@ -625,7 +634,7 @@ function playing () {
       return {
         currentTime: 0,
         totalTime: 0,
-        paused: false,
+        paused: state.paused,
         song: cloneDeep(action.payload.songs[action.payload.playing]),
         src: action.payload.songs[action.payload.playing].src instanceof Array ? action.payload.songs[action.payload.playing].src[0] : action.payload.songs[action.payload.playing].src,
         srcIndex: 0
@@ -637,6 +646,8 @@ function playing () {
 
         if (srcId !== state.srcIndex && state.song.src instanceof Array) {
           return _objectSpread2({}, cloneDeep(state), {
+            currentTime: 0,
+            totalTime: 0,
             srcIndex: srcId,
             src: state.song.src[srcId]
           });
@@ -656,6 +667,13 @@ function playing () {
     case SET_BUFFERED_TIME:
       return _objectSpread2({}, cloneDeep(state), {
         bufferedTime: cloneDeep(action.payload)
+      });
+
+    case SET_TIMES:
+      return _objectSpread2({}, cloneDeep(state), {
+        currentTime: action.payload.currentTime,
+        totalTime: action.payload.totalTime,
+        bufferedTime: cloneDeep(action.payload.bufferedTime)
       });
 
     case PAUSE:
@@ -742,6 +760,30 @@ function () {
       this._destroyed = true;
 
       this._unmount();
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this._listeners[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var item = _step.value;
+          item.unsub();
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
     }
   }, {
     key: "subscribe",
@@ -845,7 +887,11 @@ function () {
       });
 
       this._ref.addEventListener('timeupdate', function () {
-        _this2._dispatch(setCurrentTime(_this2._ref.currentTime));
+        _this2._dispatch(setTimes({
+          currentTime: _this2._ref.currentTime,
+          totalTime: _this2._ref.duration,
+          bufferedTime: _this2._ref.buffered
+        }));
       });
 
       this._ref.addEventListener('volumechange', function () {

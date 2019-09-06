@@ -8,7 +8,6 @@ export interface KokoroOptions {
 
 export declare class Kokoro {
   private _ref: HTMLAudioElement
-  private _storageKey: string
   private _destroyed?: true
   private _store: Store<State>
   private _listeners: {
@@ -105,6 +104,12 @@ export interface PlayingState {
   paused: boolean
 }
 
+export interface Times {
+  currentTime: number
+  totalTime: number
+  bufferedTime: TimeRanges | null
+}
+
 export interface PlaylistState {
   songs: { [key: string]: Song }
   orderedList: string[]
@@ -135,6 +140,7 @@ export namespace actions {
   export const SET_CURRENT_TIME = 'SET_CURRENT_TIME'
   export const SET_TOTAL_TIME = 'SET_TOTAL_TIME'
   export const SET_BUFFERED_TIME = 'SET_BUFFERED_TIME'
+  export const SET_TIMES = 'SET_TIMES'
   export const NEXT_SRC = 'NEXT_SRC'
 
   export const SET_PLAYLIST = 'SET_PLAYLIST'
@@ -154,6 +160,7 @@ export namespace actions {
   export function setCurrentTime (time: number): Action<typeof SET_CURRENT_TIME, number>
   export function setTotalTime (time: number): Action<typeof SET_TOTAL_TIME, number>
   export function setBufferedTime (buffered: TimeRanges): Action<typeof SET_BUFFERED_TIME, TimeRanges>
+  export function setTimes(times: Times): Action<typeof SET_TIMES, Times>
   export function nextSrc() : Action<typeof NEXT_SRC, undefined>
   export function next (): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
   export function autoNext (): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>

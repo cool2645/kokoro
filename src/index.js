@@ -8,9 +8,9 @@ import {
   nextSrc,
   pause,
   play, previous, removeSong,
-  setBufferedTime, setCurrentSong, setCurrentTime, setNextSong,
+  setBufferedTime, setCurrentSong, setNextSong,
   setPlaylist, setPlayOrder,
-  setSpeed,
+  setSpeed, setTimes,
   setTotalTime,
   setVolume
 } from './actions'
@@ -49,6 +49,9 @@ export class Kokoro {
   destroy () {
     this._destroyed = true
     this._unmount()
+    for (const item of this._listeners) {
+      item.unsub()
+    }
   }
 
   subscribe (listener) {
@@ -119,7 +122,11 @@ export class Kokoro {
       this._dispatch(setSpeed(this._ref.playbackRate))
     })
     this._ref.addEventListener('timeupdate', () => {
-      this._dispatch(setCurrentTime(this._ref.currentTime))
+      this._dispatch(setTimes({
+        currentTime: this._ref.currentTime,
+        totalTime: this._ref.duration,
+        bufferedTime: this._ref.buffered
+      }))
     })
     this._ref.addEventListener('volumechange', () => {
       this._dispatch(setVolume(this._ref.volume))

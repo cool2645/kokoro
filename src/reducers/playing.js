@@ -7,7 +7,7 @@ import {
   PLAY,
   SET_BUFFERED_TIME,
   SET_CURRENT_TIME,
-  SET_PLAYLIST,
+  SET_PLAYLIST, SET_TIMES,
   SET_TOTAL_TIME,
   TOGGLE_PLAY
 } from '../actions'
@@ -32,7 +32,7 @@ export default function (state = initialState, action) {
       return {
         currentTime: 0,
         totalTime: 0,
-        paused: false,
+        paused: state.paused,
         song: cloneDeep(action.payload.songs[action.payload.playing]),
         src: action.payload.songs[action.payload.playing].src instanceof Array
           ? action.payload.songs[action.payload.playing].src[0]
@@ -47,6 +47,8 @@ export default function (state = initialState, action) {
       if (srcId !== state.srcIndex && state.song.src instanceof Array) {
         return {
           ...cloneDeep(state),
+          currentTime: 0,
+          totalTime: 0,
           srcIndex: srcId,
           src: state.song.src[srcId]
         }
@@ -66,6 +68,13 @@ export default function (state = initialState, action) {
       return {
         ...cloneDeep(state),
         bufferedTime: cloneDeep(action.payload)
+      }
+    case SET_TIMES:
+      return {
+        ...cloneDeep(state),
+        currentTime: action.payload.currentTime,
+        totalTime: action.payload.totalTime,
+        bufferedTime: cloneDeep(action.payload.bufferedTime)
       }
     case PAUSE:
       return {
