@@ -2,8 +2,8 @@ import { ThunkAction } from 'redux-thunk'
 import { Dispatch, Store, Unsubscribe } from 'redux'
 
 export interface KokoroOptions {
-  storageKey: string
   audioTagId: string
+  initializeState: InitializeState
 }
 
 export declare class Kokoro {
@@ -21,6 +21,7 @@ export declare class Kokoro {
 
   private _mount (id?: string): void
   private _unmount (): void
+  private _onSrcProbablyChanged (): void
 
   protected _dispatch (): Dispatch
 
@@ -29,6 +30,23 @@ export declare class Kokoro {
   subscribe (listener: (state: State) => void): Unsubscribe
   unsubscribe (listener: (state: State) => void): void
   getState (): State
+  dumpState (): InitializeState
+
+  pause (): void
+  play (): void
+  togglePlay (): void
+  setCurrentTime (time: number): void
+  next (): void
+  previous (): void
+  setPlayOrder (playOrder: PlayOrder): void
+  nextPlayOrder (): void
+  setCurrentSong (song: Song | number | string): void
+  setNextSong (song: Song | number | string): void
+  removeSong (song: Song | number | string): void
+  setPlaylist (songs: Song[], currentSong?: Song | number | string, playOrder?: PlayOrder): void
+  clearPlaylist (): void
+  setVolume (volume: number): void
+  setSpeed (speed: number): void
 }
 
 export declare const LYRICS_TYPE_LRC = 'lrc'
@@ -78,10 +96,13 @@ export interface PlayerState {
 }
 
 export interface PlayingState {
-  song: Song
+  src: string | null
+  srcIndex: number
+  song: Song | null
   currentTime: number
   totalTime: number
-  pause: boolean
+  bufferedTime: TimeRanges | null
+  paused: boolean
 }
 
 export interface PlaylistState {
@@ -101,12 +122,20 @@ export interface State {
   playlist: PlaylistState
 }
 
+export interface InitializeState {
+  player: PlayerState
+  playlist: PlaylistState
+}
+
 export namespace actions {
 
   export const PAUSE = 'PAUSE'
   export const PLAY = 'PLAY'
   export const TOGGLE_PLAY = 'TOGGLE_PLAY'
   export const SET_CURRENT_TIME = 'SET_CURRENT_TIME'
+  export const SET_TOTAL_TIME = 'SET_TOTAL_TIME'
+  export const SET_BUFFERED_TIME = 'SET_BUFFERED_TIME'
+  export const NEXT_SRC = 'NEXT_SRC'
 
   export const SET_PLAYLIST = 'SET_PLAYLIST'
   export const CLEAR_PLAYLIST = 'CLEAR_PLAYLIST'
@@ -123,6 +152,9 @@ export namespace actions {
   export function play (): Action<typeof PLAY, undefined>
   export function togglePlay (): Action<typeof TOGGLE_PLAY, undefined>
   export function setCurrentTime (time: number): Action<typeof SET_CURRENT_TIME, number>
+  export function setTotalTime (time: number): Action<typeof SET_TOTAL_TIME, number>
+  export function setBufferedTime (buffered: TimeRanges): Action<typeof SET_BUFFERED_TIME, TimeRanges>
+  export function nextSrc() : Action<typeof NEXT_SRC, undefined>
   export function next (): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
   export function autoNext (): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>
   export function previous (): ThunkAction<undefined, State, undefined, Action<typeof SET_PLAYLIST, PlaylistState>>

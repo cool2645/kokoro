@@ -122,6 +122,9 @@ var PAUSE = 'PAUSE';
 var PLAY = 'PLAY';
 var TOGGLE_PLAY = 'TOGGLE_PLAY';
 var SET_CURRENT_TIME = 'SET_CURRENT_TIME';
+var SET_TOTAL_TIME = 'SET_TOTAL_TIME';
+var SET_BUFFERED_TIME = 'SET_BUFFERED_TIME';
+var NEXT_SRC = 'NEXT_SRC';
 function pause() {
   return {
     type: PAUSE
@@ -141,6 +144,23 @@ function setCurrentTime(time) {
   return {
     type: SET_CURRENT_TIME,
     payload: time
+  };
+}
+function setTotalTime(time) {
+  return {
+    type: SET_TOTAL_TIME,
+    payload: time
+  };
+}
+function setBufferedTime(buffered) {
+  return {
+    type: SET_BUFFERED_TIME,
+    payload: buffered
+  };
+}
+function nextSrc() {
+  return {
+    type: NEXT_SRC
   };
 }
 
@@ -498,10 +518,16 @@ var index = /*#__PURE__*/Object.freeze({
   PLAY: PLAY,
   TOGGLE_PLAY: TOGGLE_PLAY,
   SET_CURRENT_TIME: SET_CURRENT_TIME,
+  SET_TOTAL_TIME: SET_TOTAL_TIME,
+  SET_BUFFERED_TIME: SET_BUFFERED_TIME,
+  NEXT_SRC: NEXT_SRC,
   pause: pause,
   play: play,
   togglePlay: togglePlay,
   setCurrentTime: setCurrentTime,
+  setTotalTime: setTotalTime,
+  setBufferedTime: setBufferedTime,
+  nextSrc: nextSrc,
   SET_PLAYLIST: SET_PLAYLIST,
   CLEAR_PLAYLIST: CLEAR_PLAYLIST,
   setPlayOrder: setPlayOrder,
@@ -569,7 +595,7 @@ function playlist () {
       return cloneDeep(action.payload);
 
     case CLEAR_PLAYLIST:
-      return _objectSpread2({}, initialState$1, {
+      return _objectSpread2({}, cloneDeep(initialState$1), {
         playOrder: state.playOrder
       });
 
@@ -579,33 +605,72 @@ function playlist () {
 }
 
 var initialState$2 = {
+  src: null,
+  srcIndex: 0,
+  song: null,
   currentTime: 0,
   totalTime: 0,
-  pause: false
+  bufferedTime: null,
+  paused: true
 };
 function playing () {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState$2;
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
   switch (action) {
+    case CLEAR_PLAYLIST:
+      return cloneDeep(initialState$2);
+
+    case SET_PLAYLIST:
+      return {
+        currentTime: 0,
+        totalTime: 0,
+        paused: false,
+        song: cloneDeep(action.payload.songs[action.payload.playing]),
+        src: action.payload.songs[action.payload.playing].src instanceof Array ? action.payload.songs[action.payload.playing].src[0] : action.payload.songs[action.payload.playing].src,
+        srcIndex: 0
+      };
+
+    case NEXT_SRC:
+      {
+        var srcId = state.song.src instanceof Array ? state.srcIndex + 1 < state.song.src.length ? state.srcIndex + 1 : 0 : 0;
+
+        if (srcId !== state.srcIndex && state.song.src instanceof Array) {
+          return _objectSpread2({}, cloneDeep(state), {
+            srcIndex: srcId,
+            src: state.song.src[srcId]
+          });
+        } else return state;
+      }
+
     case SET_CURRENT_TIME:
-      return _objectSpread2({}, state, {
+      return _objectSpread2({}, cloneDeep(state), {
         currentTime: action.payload
       });
 
+    case SET_TOTAL_TIME:
+      return _objectSpread2({}, cloneDeep(state), {
+        totalTime: action.payload
+      });
+
+    case SET_BUFFERED_TIME:
+      return _objectSpread2({}, cloneDeep(state), {
+        bufferedTime: cloneDeep(action.payload)
+      });
+
     case PAUSE:
-      return _objectSpread2({}, state, {
-        pause: true
+      return _objectSpread2({}, cloneDeep(state), {
+        paused: true
       });
 
     case PLAY:
-      return _objectSpread2({}, state, {
-        pause: false
+      return _objectSpread2({}, cloneDeep(state), {
+        paused: false
       });
 
     case TOGGLE_PLAY:
-      return _objectSpread2({}, state, {
-        pause: !state.pause
+      return _objectSpread2({}, cloneDeep(state), {
+        paused: !state.paused
       });
 
     default:
@@ -618,10 +683,23 @@ var reducers = combineReducers({
   playing: playing,
   playlist: playlist
 });
+function saveState(state) {
+  var exportedState = cloneDeep(state);
+  delete exportedState.playing;
+  return exportedState;
+}
+function loadState(state) {
+  if (!state) return undefined;
+  var importedState = cloneDeep(state);
+  importedState.playing = initialState$2;
+  importedState.playing.song = importedState.playlist.songs[importedState.playlist.playing];
+  importedState.playing.src = importedState.playing.song.src instanceof Array ? importedState.playing.song.src[0] : importedState.playing.song.src;
+  return importedState;
+}
 
 var defaultOptions = {
-  storageKey: 'kokoro-store',
-  audioTagId: 'kokoro-sevice'
+  audioTagId: 'kokoro-sevice',
+  initializeState: null
 };
 var Kokoro =
 /*#__PURE__*/
@@ -652,12 +730,10 @@ function () {
     _classCallCheck(this, Kokoro);
 
     var op = Object.assign({}, defaultOptions, options);
-    this._storageKey = op.storageKey;
+    this._store = op.initializeState ? createStore(reducers, loadState(op.initializeState), composeWithDevTools(applyMiddleware(thunk))) : createStore(reducers, composeWithDevTools(applyMiddleware(thunk)));
+    this._listeners = [];
 
     this._mount(op.audioTagId);
-
-    this._store = createStore(reducers, composeWithDevTools(applyMiddleware(thunk)));
-    this._listeners = [];
   }
 
   _createClass(Kokoro, [{
@@ -706,16 +782,184 @@ function () {
       }
     }
   }, {
+    key: "dumpState",
+    value: function dumpState() {
+      return saveState(this.getState());
+    }
+  }, {
     key: "_mount",
     value: function _mount(id) {
+      var _this2 = this;
+
       this._ref = document.createElement('audio');
       if (id) this._ref.id = id;
+
+      this._ref.addEventListener('canplay', function () {
+        _this2._dispatch(setBufferedTime(_this2._ref.buffered));
+      });
+
+      this._ref.addEventListener('canplaythrough', function () {
+        _this2._dispatch(setBufferedTime(_this2._ref.buffered));
+      });
+
+      this._ref.addEventListener('durationchange', function () {
+        _this2._dispatch(setTotalTime(_this2._ref.duration));
+      });
+
+      this._ref.addEventListener('ended', function () {
+        _this2._dispatch(autoNext());
+
+        _this2._onSrcProbablyChanged();
+      });
+
+      this._ref.addEventListener('error', function () {
+        var state = _this2.getState();
+
+        if (state.playing.song.src instanceof Array && state.playing.srcIndex + 1 < state.playing.song.src.length) {
+          _this2._dispatch(nextSrc());
+        } else {
+          _this2._dispatch(autoNext());
+        }
+
+        _this2._onSrcProbablyChanged();
+      });
+
+      this._ref.addEventListener('loadedmetadata', function () {
+        _this2._dispatch(setTotalTime(_this2._ref.duration));
+      });
+
+      this._ref.addEventListener('pause', function () {
+        _this2._dispatch(pause());
+      });
+
+      this._ref.addEventListener('play', function () {
+        _this2._dispatch(play());
+      });
+
+      this._ref.addEventListener('progress', function () {
+        _this2._dispatch(setBufferedTime(_this2._ref.buffered));
+      });
+
+      this._ref.addEventListener('ratechange', function () {
+        _this2._dispatch(setSpeed(_this2._ref.playbackRate));
+      });
+
+      this._ref.addEventListener('timeupdate', function () {
+        _this2._dispatch(setCurrentTime(_this2._ref.currentTime));
+      });
+
+      this._ref.addEventListener('volumechange', function () {
+        _this2._dispatch(setVolume(_this2._ref.volume));
+      });
+
       document.body.appendChild(this._ref);
     }
   }, {
     key: "_unmount",
     value: function _unmount() {
       this._ref.remove();
+    }
+  }, {
+    key: "_onSrcProbablyChanged",
+    value: function _onSrcProbablyChanged() {
+      var state = this.getState();
+
+      if (state.playing.src !== this._ref.src) {
+        this._ref.src = state.playing.src;
+      }
+
+      this._ref.currentTime = state.playing.currentTime;
+    }
+  }, {
+    key: "pause",
+    value: function pause() {
+      this._ref.pause();
+    }
+  }, {
+    key: "play",
+    value: function play() {
+      this._ref.play();
+    }
+  }, {
+    key: "togglePlay",
+    value: function togglePlay() {
+      var state = this.getState;
+
+      if (state.playing.paused) {
+        this._ref.play();
+      } else this._ref.pause();
+    }
+  }, {
+    key: "setCurrentTime",
+    value: function setCurrentTime(time) {
+      this._ref.currentTime = time;
+    }
+  }, {
+    key: "next",
+    value: function next$1() {
+      this._dispatch(next());
+
+      this._onSrcProbablyChanged();
+    }
+  }, {
+    key: "previous",
+    value: function previous$1() {
+      this._dispatch(previous());
+
+      this._onSrcProbablyChanged();
+    }
+  }, {
+    key: "setPlayOrder",
+    value: function setPlayOrder$1(playOrder) {
+      this._dispatch(setPlayOrder(playOrder));
+    }
+  }, {
+    key: "nextPlayOrder",
+    value: function nextPlayOrder$1() {
+      this._dispatch(nextPlayOrder());
+    }
+  }, {
+    key: "setCurrentSong",
+    value: function setCurrentSong$1(song) {
+      this._dispatch(setCurrentSong(song));
+
+      this._onSrcProbablyChanged();
+    }
+  }, {
+    key: "setNextSong",
+    value: function setNextSong$1(song) {
+      this._dispatch(setNextSong(song));
+    }
+  }, {
+    key: "removeSong",
+    value: function removeSong$1(song) {
+      this._dispatch(removeSong(song));
+
+      this._onSrcProbablyChanged();
+    }
+  }, {
+    key: "setPlaylist",
+    value: function setPlaylist$1(songs, currentSong, playOrder) {
+      this._dispatch(setPlaylist(songs, currentSong, playOrder));
+
+      this._onSrcProbablyChanged();
+    }
+  }, {
+    key: "clearPlaylist",
+    value: function clearPlaylist$1() {
+      this._dispatch(clearPlaylist());
+
+      this._onSrcProbablyChanged();
+    }
+  }, {
+    key: "setVolume",
+    value: function setVolume(volume) {
+      this._ref.volume = volume;
+    }
+  }, {
+    key: "setSpeed",
+    value: function setSpeed(speed) {
+      this._ref.playbackRate = speed;
     }
   }]);
 

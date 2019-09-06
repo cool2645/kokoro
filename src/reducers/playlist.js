@@ -20,7 +20,7 @@ export default function (state = initialState, action) {
       return cloneDeep(action.payload)
     case CLEAR_PLAYLIST:
       return {
-        ...initialState,
+        ...cloneDeep(initialState),
         playOrder: state.playOrder
       }
     default:
