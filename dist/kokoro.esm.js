@@ -202,9 +202,33 @@ function () {
 
   return Song;
 }();
+var TimeRanges =
+/*#__PURE__*/
+function () {
+  function TimeRanges() {
+    _classCallCheck(this, TimeRanges);
+  }
+
+  _createClass(TimeRanges, null, [{
+    key: "toArray",
+    value: function toArray(timeRanges) {
+      var length = timeRanges.length;
+      var arr = [];
+
+      for (var i = 0; i < length; i++) {
+        arr.push([timeRanges.start(i), timeRanges.end(i)]);
+      }
+
+      return arr;
+    }
+  }]);
+
+  return TimeRanges;
+}();
 
 var helpers = /*#__PURE__*/Object.freeze({
-  Song: Song
+  Song: Song,
+  TimeRanges: TimeRanges
 });
 
 var SET_PLAYLIST = 'SET_PLAYLIST';
@@ -517,8 +541,9 @@ function setPlaylist(songs, currentSong, playOrder) {
         if (newPlaylistState.playOrder === PLAY_ORDER_SHUFFLE) {
           newPlaylistState.shuffledList = shuffle(newPlaylistState.orderedList);
           newPlaylistState.shuffledIndexOfPlaying = newPlaylistState.shuffledList.indexOf(songId);
-          newPlaylistState.playing = songId;
         }
+
+        newPlaylistState.playing = songId;
       } else {
         if (newPlaylistState.playOrder === PLAY_ORDER_SHUFFLE) {
           newPlaylistState.shuffledList = shuffle(newPlaylistState.orderedList);
@@ -594,7 +619,6 @@ function player () {
         return state;
       }
 
-      action.payload = Math.min(Math.max(action.payload, 0), 1);
       return _objectSpread2({}, state, {
         volume: action.payload
       });
@@ -604,7 +628,6 @@ function player () {
         return state;
       }
 
-      action.payload = Math.min(Math.max(action.payload, 0), 1);
       return _objectSpread2({}, state, {
         speed: action.payload
       });
@@ -861,11 +884,11 @@ function () {
       if (id) this._ref.id = id;
 
       this._ref.addEventListener('canplay', function () {
-        _this2._dispatch(setBufferedTime(_this2._ref.buffered));
+        _this2._dispatch(setBufferedTime(TimeRanges.toArray(_this2._ref.buffered)));
       });
 
       this._ref.addEventListener('canplaythrough', function () {
-        _this2._dispatch(setBufferedTime(_this2._ref.buffered));
+        _this2._dispatch(setBufferedTime(TimeRanges.toArray(_this2._ref.buffered)));
       });
 
       this._ref.addEventListener('durationchange', function () {
@@ -907,7 +930,7 @@ function () {
       });
 
       this._ref.addEventListener('progress', function () {
-        _this2._dispatch(setBufferedTime(_this2._ref.buffered));
+        _this2._dispatch(setBufferedTime(TimeRanges.toArray(_this2._ref.buffered)));
       });
 
       this._ref.addEventListener('ratechange', function () {
@@ -918,7 +941,7 @@ function () {
         _this2._dispatch(setTimes({
           currentTime: _this2._ref.currentTime,
           totalTime: _this2._ref.duration,
-          bufferedTime: _this2._ref.buffered
+          bufferedTime: TimeRanges.toArray(_this2._ref.buffered)
         }));
       });
 
@@ -962,7 +985,7 @@ function () {
   }, {
     key: "togglePlay",
     value: function togglePlay() {
-      var state = this.getState;
+      var state = this.getState();
 
       if (state.playing.paused) {
         this._ref.play();
@@ -970,8 +993,10 @@ function () {
     }
   }, {
     key: "setCurrentTime",
-    value: function setCurrentTime(time) {
+    value: function setCurrentTime$1(time) {
       this._ref.currentTime = time;
+
+      this._dispatch(setCurrentTime(time));
     }
   }, {
     key: "next",
@@ -1038,12 +1063,16 @@ function () {
     }
   }, {
     key: "setVolume",
-    value: function setVolume(volume) {
+    value: function setVolume$1(volume) {
+      this._dispatch(setVolume(volume));
+
       this._ref.volume = volume;
     }
   }, {
     key: "setSpeed",
-    value: function setSpeed(speed) {
+    value: function setSpeed$1(speed) {
+      this._dispatch(setSpeed(speed));
+
       this._ref.playbackRate = speed;
     }
   }]);

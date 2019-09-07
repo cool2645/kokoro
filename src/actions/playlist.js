@@ -241,8 +241,8 @@ export function setPlaylist (songs, currentSong, playOrder) {
         if (newPlaylistState.playOrder === PLAY_ORDER_SHUFFLE) {
           newPlaylistState.shuffledList = shuffle(newPlaylistState.orderedList)
           newPlaylistState.shuffledIndexOfPlaying = newPlaylistState.shuffledList.indexOf(songId)
-          newPlaylistState.playing = songId
         }
+        newPlaylistState.playing = songId
       } else {
         if (newPlaylistState.playOrder === PLAY_ORDER_SHUFFLE) {
           newPlaylistState.shuffledList = shuffle(newPlaylistState.orderedList)

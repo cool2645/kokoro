@@ -12,3 +12,17 @@ export class Song {
     return encodeURI(good)
   }
 }
+
+export class TimeRanges {
+  static toArray (timeRanges) {
+    const length = timeRanges.length
+    const arr = []
+    for (let i = 0; i < length; i++) {
+      arr.push([
+        timeRanges.start(i),
+        timeRanges.end(i)
+      ])
+    }
+    return arr
+  }
+}

@@ -90,6 +90,8 @@ export type IPlayOrder =
 
 export default Kokoro
 
+export type ITimeRanges = [number, number][]
+
 export interface IPlayerState {
   volume: number
   speed: number
@@ -101,14 +103,14 @@ export interface IPlayingState {
   song: ISong | null
   currentTime: number
   totalTime: number
-  bufferedTime: TimeRanges | null
+  bufferedTime: ITimeRanges | null
   paused: boolean
 }
 
 export interface ITimes {
   currentTime: number
   totalTime: number
-  bufferedTime: TimeRanges | null
+  bufferedTime: ITimeRanges | null
 }
 
 export interface IPlaylistState {
@@ -160,7 +162,7 @@ export namespace actions {
   export function togglePlay (): IAction<typeof TOGGLE_PLAY, undefined>
   export function setCurrentTime (time: number): IAction<typeof SET_CURRENT_TIME, number>
   export function setTotalTime (time: number): IAction<typeof SET_TOTAL_TIME, number>
-  export function setBufferedTime (buffered: TimeRanges): IAction<typeof SET_BUFFERED_TIME, TimeRanges>
+  export function setBufferedTime (buffered: ITimeRanges): IAction<typeof SET_BUFFERED_TIME, ITimeRanges>
   export function setTimes(times: ITimes): IAction<typeof SET_TIMES, ITimes>
   export function nextSrc() : IAction<typeof NEXT_SRC, undefined>
   export function next (): ThunkAction<undefined, IState, undefined, IAction<typeof SET_PLAYLIST, IPlaylistState>>
@@ -178,10 +180,16 @@ export namespace actions {
 
 }
 
+type DOMTimeRanges = TimeRanges
+
 export namespace helpers {
 
   export class Song {
     static id (song: ISong): string
+  }
+
+  export class TimeRanges {
+    static toArray (timeRanges: DOMTimeRanges): ITimeRanges
   }
 
 }

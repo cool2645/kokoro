@@ -11,7 +11,6 @@ export default function (state = initialState, action) {
       if (typeof action.payload !== 'number') {
         return state
       }
-      action.payload = Math.min(Math.max(action.payload, 0), 1)
       return {
         ...state,
         volume: action.payload
@@ -20,7 +19,6 @@ export default function (state = initialState, action) {
       if (typeof action.payload !== 'number') {
         return state
       }
-      action.payload = Math.min(Math.max(action.payload, 0), 1)
       return {
         ...state,
         speed: action.payload

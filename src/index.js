@@ -8,13 +8,13 @@ import {
   nextSrc,
   pause,
   play, previous, removeSong,
-  setBufferedTime, setCurrentSong, setNextSong,
+  setBufferedTime, setCurrentSong, setCurrentTime, setNextSong,
   setPlaylist, setPlayOrder,
   setSpeed, setTimes,
   setTotalTime,
   setVolume
 } from './actions'
-import { Song } from './helpers'
+import { Song, TimeRanges } from './helpers'
 
 const defaultOptions = {
   audioTagId: 'kokoro-sevice',
@@ -85,10 +85,10 @@ export class Kokoro {
     if (id) this._ref.id = id
 
     this._ref.addEventListener('canplay', () => {
-      this._dispatch(setBufferedTime(this._ref.buffered))
+      this._dispatch(setBufferedTime(TimeRanges.toArray(this._ref.buffered)))
     })
     this._ref.addEventListener('canplaythrough', () => {
-      this._dispatch(setBufferedTime(this._ref.buffered))
+      this._dispatch(setBufferedTime(TimeRanges.toArray(this._ref.buffered)))
     })
     this._ref.addEventListener('durationchange', () => {
       this._dispatch(setTotalTime(this._ref.duration))
@@ -119,7 +119,7 @@ export class Kokoro {
       this._dispatch(play())
     })
     this._ref.addEventListener('progress', () => {
-      this._dispatch(setBufferedTime(this._ref.buffered))
+      this._dispatch(setBufferedTime(TimeRanges.toArray(this._ref.buffered)))
     })
     this._ref.addEventListener('ratechange', () => {
       this._dispatch(setSpeed(this._ref.playbackRate))
@@ -128,7 +128,7 @@ export class Kokoro {
       this._dispatch(setTimes({
         currentTime: this._ref.currentTime,
         totalTime: this._ref.duration,
-        bufferedTime: this._ref.buffered
+        bufferedTime: TimeRanges.toArray(this._ref.buffered)
       }))
     })
     this._ref.addEventListener('volumechange', () => {
@@ -163,7 +163,7 @@ export class Kokoro {
   }
 
   togglePlay () {
-    const state = this.getState
+    const state = this.getState()
     if (state.playing.paused) {
       this._ref.play()
     } else this._ref.pause()
@@ -171,6 +171,7 @@ export class Kokoro {
 
   setCurrentTime (time) {
     this._ref.currentTime = time
+    this._dispatch(setCurrentTime(time))
   }
 
   next () {
@@ -219,10 +220,12 @@ export class Kokoro {
   }
 
   setVolume (volume) {
+    this._dispatch(setVolume(volume))
     this._ref.volume = volume
   }
 
   setSpeed (speed) {
+    this._dispatch(setSpeed(speed))
     this._ref.playbackRate = speed
   }
 }
