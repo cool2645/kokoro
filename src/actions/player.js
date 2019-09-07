@@ -8,9 +8,9 @@ export function setVolume (volume) {
   }
 }
 
-export function setSpeed (speed) {
+export function setSpeed (speedRate) {
   return {
     type: SET_SPEED,
-    payload: speed
+    payload: speedRate
   }
 }

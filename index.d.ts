@@ -1,31 +1,27 @@
 import { ThunkAction } from 'redux-thunk'
 import { Dispatch, Store, Unsubscribe } from 'redux'
 
-export interface IKokoroOptions {
-  audioTagId: string
-  initializeState: IInitializeState
-}
-
 export declare class Kokoro {
-  private _ref: HTMLAudioElement
-  private _destroyed?: true
-  private _store: Store<IState>
-  private _listeners: {
+  protected _ref: HTMLAudioElement
+  protected _destroyed?: true
+  protected _store: Store<IState>
+  protected _listeners: {
     listener: (state: IState) => void
     unsub: () => void
   }[]
 
   readonly ref: HTMLAudioElement
   readonly store: Store<IState>
+  readonly destroyed: boolean
 
-  private _mount (id?: string): void
-  private _unmount (): void
-  private _onSrcProbablyChanged (): void
-  private _triggerPlay (): void
+  protected _onSrcProbablyChanged (): void
+  protected _triggerPlay (): void
 
   protected _dispatch (): Dispatch
 
-  constructor (options?: IKokoroOptions)
+  constructor (initializeState?: IInitializeState)
+  mount (parentNode?: HTMLElement, id?: string): void
+  unmount (): void
   destroy (): void
   subscribe (listener: (state: IState) => void): Unsubscribe
   unsubscribe (listener: (state: IState) => void): void
@@ -46,7 +42,7 @@ export declare class Kokoro {
   setPlaylist (songs: ISong[], currentSong?: ISong | number | string, playOrder?: IPlayOrder): void
   clearPlaylist (): void
   setVolume (volume: number): void
-  setSpeed (speed: number): void
+  setSpeed (speedRate: number): void
 }
 
 export declare const LYRICS_TYPE_LRC = 'lrc'
@@ -176,7 +172,7 @@ export namespace actions {
   export function setPlaylist (songs: ISong[], currentSong?: ISong | number | string, playOrder?: IPlayOrder): ThunkAction<undefined, IState, undefined, IAction<typeof SET_PLAYLIST, IPlaylistState>>
   export function clearPlaylist (): IAction<typeof CLEAR_PLAYLIST, undefined>
   export function setVolume (volume: number): IAction<typeof SET_VOLUME, number>
-  export function setSpeed (speed: number): IAction<typeof SET_SPEED, number>
+  export function setSpeed (speedRate: number): IAction<typeof SET_SPEED, number>
 
 }
 

@@ -111,10 +111,10 @@ function setVolume(volume) {
     payload: volume
   };
 }
-function setSpeed(speed) {
+function setSpeed(speedRate) {
   return {
     type: SET_SPEED,
-    payload: speed
+    payload: speedRate
   };
 }
 
@@ -762,10 +762,6 @@ function loadState(state) {
   return importedState;
 }
 
-var defaultOptions = {
-  audioTagId: 'kokoro-sevice',
-  initializeState: null
-};
 var Kokoro =
 /*#__PURE__*/
 function () {
@@ -789,25 +785,94 @@ function () {
     get: function get() {
       return this._store.getState;
     }
+  }, {
+    key: "destroyed",
+    get: function get() {
+      return this._destroyed || false;
+    }
   }]);
 
-  function Kokoro(options) {
+  function Kokoro(initializeState) {
+    var _this = this;
+
     _classCallCheck(this, Kokoro);
 
-    var op = Object.assign({}, defaultOptions, options);
-    this._store = op.initializeState ? createStore(reducers, loadState(op.initializeState), composeWithDevTools(applyMiddleware(thunk))) : createStore(reducers, composeWithDevTools(applyMiddleware(thunk)));
-    this._listeners = [];
+    this._store = initializeState ? createStore(reducers, loadState(initializeState), composeWithDevTools(applyMiddleware(thunk))) : createStore(reducers, composeWithDevTools(applyMiddleware(thunk)));
+    this._ref = new window.Audio();
 
-    this._mount(op.audioTagId);
+    this._ref.addEventListener('canplay', function () {
+      _this._dispatch(setBufferedTime(TimeRanges.toArray(_this._ref.buffered)));
+    });
+
+    this._ref.addEventListener('canplaythrough', function () {
+      _this._dispatch(setBufferedTime(TimeRanges.toArray(_this._ref.buffered)));
+    });
+
+    this._ref.addEventListener('durationchange', function () {
+      _this._dispatch(setTotalTime(_this._ref.duration));
+    });
+
+    this._ref.addEventListener('ended', function () {
+      _this._dispatch(autoNext());
+
+      _this._onSrcProbablyChanged();
+
+      _this._triggerPlay();
+    });
+
+    this._ref.addEventListener('error', function () {
+      var state = _this.getState();
+
+      if (state.playing.song.src instanceof Array && state.playing.srcIndex + 1 < state.playing.song.src.length) {
+        _this._dispatch(nextSrc());
+      } else {
+        _this._dispatch(autoNext());
+      }
+
+      _this._onSrcProbablyChanged();
+
+      _this._triggerPlay();
+    });
+
+    this._ref.addEventListener('loadedmetadata', function () {
+      _this._dispatch(setTotalTime(_this._ref.duration));
+    });
+
+    this._ref.addEventListener('pause', function () {
+      _this._dispatch(pause());
+    });
+
+    this._ref.addEventListener('play', function () {
+      _this._dispatch(play());
+    });
+
+    this._ref.addEventListener('progress', function () {
+      _this._dispatch(setBufferedTime(TimeRanges.toArray(_this._ref.buffered)));
+    });
+
+    this._ref.addEventListener('ratechange', function () {
+      _this._dispatch(setSpeed(_this._ref.playbackRate));
+    });
+
+    this._ref.addEventListener('timeupdate', function () {
+      _this._dispatch(setTimes({
+        currentTime: _this._ref.currentTime,
+        totalTime: _this._ref.duration,
+        bufferedTime: TimeRanges.toArray(_this._ref.buffered)
+      }));
+    });
+
+    this._ref.addEventListener('volumechange', function () {
+      _this._dispatch(setVolume(_this._ref.volume));
+    });
+
+    this._listeners = [];
   }
 
   _createClass(Kokoro, [{
     key: "destroy",
     value: function destroy() {
       this._destroyed = true;
-
-      this._unmount();
-
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -831,11 +896,15 @@ function () {
           }
         }
       }
+
+      this.unmount();
+
+      this._ref.load();
     }
   }, {
     key: "subscribe",
     value: function subscribe(listener) {
-      var _this = this;
+      var _this2 = this;
 
       var o = this._listeners.find(function (item) {
         return item.listener === listener;
@@ -846,7 +915,7 @@ function () {
       }
 
       var unsub = this._store.subscribe(function () {
-        return listener(_this.getState());
+        return listener(_this2.getState());
       });
 
       this._listeners.push({
@@ -876,84 +945,18 @@ function () {
       return saveState(this.getState());
     }
   }, {
-    key: "_mount",
-    value: function _mount(id) {
-      var _this2 = this;
+    key: "mount",
+    value: function mount(parentNode, id) {
+      if (typeof parentNode === 'string' || id) {
+        this._ref.id = typeof parentNode === 'string' ? parentNode : id;
+      }
 
-      this._ref = document.createElement('audio');
-      if (id) this._ref.id = id;
-
-      this._ref.addEventListener('canplay', function () {
-        _this2._dispatch(setBufferedTime(TimeRanges.toArray(_this2._ref.buffered)));
-      });
-
-      this._ref.addEventListener('canplaythrough', function () {
-        _this2._dispatch(setBufferedTime(TimeRanges.toArray(_this2._ref.buffered)));
-      });
-
-      this._ref.addEventListener('durationchange', function () {
-        _this2._dispatch(setTotalTime(_this2._ref.duration));
-      });
-
-      this._ref.addEventListener('ended', function () {
-        _this2._dispatch(autoNext());
-
-        _this2._onSrcProbablyChanged();
-
-        _this2._triggerPlay();
-      });
-
-      this._ref.addEventListener('error', function () {
-        var state = _this2.getState();
-
-        if (state.playing.song.src instanceof Array && state.playing.srcIndex + 1 < state.playing.song.src.length) {
-          _this2._dispatch(nextSrc());
-        } else {
-          _this2._dispatch(autoNext());
-        }
-
-        _this2._onSrcProbablyChanged();
-
-        _this2._triggerPlay();
-      });
-
-      this._ref.addEventListener('loadedmetadata', function () {
-        _this2._dispatch(setTotalTime(_this2._ref.duration));
-      });
-
-      this._ref.addEventListener('pause', function () {
-        _this2._dispatch(pause());
-      });
-
-      this._ref.addEventListener('play', function () {
-        _this2._dispatch(play());
-      });
-
-      this._ref.addEventListener('progress', function () {
-        _this2._dispatch(setBufferedTime(TimeRanges.toArray(_this2._ref.buffered)));
-      });
-
-      this._ref.addEventListener('ratechange', function () {
-        _this2._dispatch(setSpeed(_this2._ref.playbackRate));
-      });
-
-      this._ref.addEventListener('timeupdate', function () {
-        _this2._dispatch(setTimes({
-          currentTime: _this2._ref.currentTime,
-          totalTime: _this2._ref.duration,
-          bufferedTime: TimeRanges.toArray(_this2._ref.buffered)
-        }));
-      });
-
-      this._ref.addEventListener('volumechange', function () {
-        _this2._dispatch(setVolume(_this2._ref.volume));
-      });
-
-      document.body.appendChild(this._ref);
+      var parent = parentNode instanceof window.HTMLElement ? parentNode : document.body;
+      parent.appendChild(this._ref);
     }
   }, {
-    key: "_unmount",
-    value: function _unmount() {
+    key: "unmount",
+    value: function unmount() {
       this._ref.remove();
     }
   }, {
@@ -1070,10 +1073,10 @@ function () {
     }
   }, {
     key: "setSpeed",
-    value: function setSpeed$1(speed) {
-      this._dispatch(setSpeed(speed));
+    value: function setSpeed$1(speedRate) {
+      this._dispatch(setSpeed(speedRate));
 
-      this._ref.playbackRate = speed;
+      this._ref.playbackRate = speedRate;
     }
   }]);
 

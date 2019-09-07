@@ -16,11 +16,6 @@ import {
 } from './actions'
 import { Song, TimeRanges } from './helpers'
 
-const defaultOptions = {
-  audioTagId: 'kokoro-sevice',
-  initializeState: null
-}
-
 export class Kokoro {
   get ref () {
     return this._ref
@@ -38,51 +33,16 @@ export class Kokoro {
     return this._store.getState
   }
 
-  constructor (options) {
-    const op = Object.assign({}, defaultOptions, options)
-    this._store = op.initializeState
-      ? createStore(reducers, loadState(op.initializeState), composeWithDevTools(applyMiddleware(thunk)))
+  get destroyed () {
+    return this._destroyed || false
+  }
+
+  constructor (initializeState) {
+    this._store = initializeState
+      ? createStore(reducers, loadState(initializeState), composeWithDevTools(applyMiddleware(thunk)))
       : createStore(reducers, composeWithDevTools(applyMiddleware(thunk)))
-    this._listeners = []
-    this._mount(op.audioTagId)
-  }
 
-  destroy () {
-    this._destroyed = true
-    this._unmount()
-    for (const item of this._listeners) {
-      item.unsub()
-    }
-  }
-
-  subscribe (listener) {
-    const o = this._listeners.find(item => item.listener === listener)
-    if (o) {
-      return o.unsub
-    }
-    const unsub = this._store.subscribe(() => listener(this.getState()))
-    this._listeners.push({
-      listener,
-      unsub
-    })
-    return unsub
-  }
-
-  unsubscribe (listener) {
-    const o = this._listeners.find(item => item.listener === listener)
-    if (o) {
-      o.unsub()
-      this._listeners = this._listeners.filter(item => item.listener !== listener)
-    }
-  }
-
-  dumpState () {
-    return saveState(this.getState())
-  }
-
-  _mount (id) {
-    this._ref = document.createElement('audio')
-    if (id) this._ref.id = id
+    this._ref = new window.Audio()
 
     this._ref.addEventListener('canplay', () => {
       this._dispatch(setBufferedTime(TimeRanges.toArray(this._ref.buffered)))
@@ -135,10 +95,54 @@ export class Kokoro {
       this._dispatch(setVolume(this._ref.volume))
     })
 
-    document.body.appendChild(this._ref)
+    this._listeners = []
   }
 
-  _unmount () {
+  destroy () {
+    this._destroyed = true
+    for (const item of this._listeners) {
+      item.unsub()
+    }
+    this.unmount()
+    this._ref.load()
+  }
+
+  subscribe (listener) {
+    const o = this._listeners.find(item => item.listener === listener)
+    if (o) {
+      return o.unsub
+    }
+    const unsub = this._store.subscribe(() => listener(this.getState()))
+    this._listeners.push({
+      listener,
+      unsub
+    })
+    return unsub
+  }
+
+  unsubscribe (listener) {
+    const o = this._listeners.find(item => item.listener === listener)
+    if (o) {
+      o.unsub()
+      this._listeners = this._listeners.filter(item => item.listener !== listener)
+    }
+  }
+
+  dumpState () {
+    return saveState(this.getState())
+  }
+
+  mount (parentNode, id) {
+    if (typeof parentNode === 'string' || id) {
+      this._ref.id = typeof parentNode === 'string'
+        ? parentNode : id
+    }
+    const parent = parentNode instanceof window.HTMLElement
+      ? parentNode : document.body
+    parent.appendChild(this._ref)
+  }
+
+  unmount () {
     this._ref.remove()
   }
 
@@ -224,9 +228,9 @@ export class Kokoro {
     this._ref.volume = volume
   }
 
-  setSpeed (speed) {
-    this._dispatch(setSpeed(speed))
-    this._ref.playbackRate = speed
+  setSpeed (speedRate) {
+    this._dispatch(setSpeed(speedRate))
+    this._ref.playbackRate = speedRate
   }
 }
 
