@@ -45,10 +45,8 @@ export declare class Kokoro {
   setSpeed (speedRate: number): void
 }
 
-export declare const LYRICS_TYPE_LRC = 'lrc'
-
-export interface ILrcLyrics {
-  type: typeof LYRICS_TYPE_LRC
+export interface ILyrics {
+  type?: string
   text: string
   translation?: {
     text: string
@@ -56,15 +54,6 @@ export interface ILrcLyrics {
     name: string
   }[]
 }
-
-export declare const LYRICS_TYPE_L2C = 'l2c'
-
-export interface IL2cLyrics {
-  type: typeof LYRICS_TYPE_L2C
-  text: string
-}
-
-export type ILyrics = ILrcLyrics | IL2cLyrics
 
 export interface ISong {
   title?: string

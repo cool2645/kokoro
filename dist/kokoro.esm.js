@@ -227,8 +227,6 @@ function nextSrc() {
   };
 }
 
-var LYRICS_TYPE_LRC = 'lrc';
-var LYRICS_TYPE_L2C = 'l2c';
 var PLAY_ORDER_LOOP = 'PLAY_ORDER_LOOP';
 var PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE';
 var PLAY_ORDER_SHUFFLE = 'PLAY_ORDER_SHUFFLE';
@@ -1095,5 +1093,5 @@ function () {
 }();
 
 export default Kokoro;
-export { Kokoro, LYRICS_TYPE_L2C, LYRICS_TYPE_LRC, PLAY_ORDER, PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE, index as actions, helpers };
+export { Kokoro, PLAY_ORDER, PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE, index as actions, helpers };
 //# sourceMappingURL=kokoro.esm.js.map
