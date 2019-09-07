@@ -124,7 +124,6 @@ export namespace actions {
 
   export const PAUSE = 'PAUSE'
   export const PLAY = 'PLAY'
-  export const TOGGLE_PLAY = 'TOGGLE_PLAY'
   export const SET_CURRENT_TIME = 'SET_CURRENT_TIME'
   export const SET_TOTAL_TIME = 'SET_TOTAL_TIME'
   export const SET_BUFFERED_TIME = 'SET_BUFFERED_TIME'
@@ -144,7 +143,6 @@ export namespace actions {
 
   export function pause (): IAction<typeof PAUSE, undefined>
   export function play (): IAction<typeof PLAY, undefined>
-  export function togglePlay (): IAction<typeof TOGGLE_PLAY, undefined>
   export function setCurrentTime (time: number): IAction<typeof SET_CURRENT_TIME, number>
   export function setTotalTime (time: number): IAction<typeof SET_TOTAL_TIME, number>
   export function setBufferedTime (buffered: ITimeRanges): IAction<typeof SET_BUFFERED_TIME, ITimeRanges>

@@ -24,5 +24,11 @@
       }
     ]
   },
+  "overrides": [{
+    "files": "test/**",
+    "rules": {
+      "no-undef": 0
+    }
+  }],
   "plugins": ["import"]
 }

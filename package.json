@@ -8,7 +8,7 @@
     "develop": "webpack-dev-server --mode development",
     "build": "rollup -c && webpack",
     "version": "webpack",
-    "test": "echo \\\"Error: no example specified\\\" && exit 1",
+    "test": "jest --coverage",
     "lint": "eslint --fix .",
     "gitadd": "git add -A"
   },
@@ -39,6 +39,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "jest": "^24.9.0",
+    "jest-mock-random": "^1.0.2",
     "pre-commit": "^1.2.2",
     "rollup": "^1.20.3",
     "rollup-plugin-babel": "^4.3.3",
@@ -55,6 +56,7 @@
     "redux-thunk": "^2.3.0"
   },
   "pre-commit": [
+    "test",
     "lint",
     "gitadd"
   ]

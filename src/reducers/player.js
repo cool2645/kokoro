@@ -8,17 +8,11 @@ const initialState = {
 export default function (state = initialState, action) {
   switch (action.type) {
     case SET_VOLUME:
-      if (typeof action.payload !== 'number') {
-        return state
-      }
       return {
         ...state,
         volume: action.payload
       }
     case SET_SPEED:
-      if (typeof action.payload !== 'number') {
-        return state
-      }
       return {
         ...state,
         speed: action.payload

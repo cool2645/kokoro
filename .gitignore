@@ -2,6 +2,7 @@
 node_modules
 /public
 /docs
+/coverage
 
 # local env files
 .env.local
