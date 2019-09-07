@@ -60,6 +60,7 @@ export class Kokoro {
     })
     this._ref.addEventListener('error', () => {
       const state = this.getState()
+      if (state.playing.song === null) return
       if (state.playing.song.src instanceof Array &&
         state.playing.srcIndex + 1 < state.playing.song.src.length) {
         this._dispatch(nextSrc())
@@ -92,7 +93,8 @@ export class Kokoro {
       }))
     })
     this._ref.addEventListener('volumechange', () => {
-      this._dispatch(setVolume(this._ref.volume))
+      if (this._ref.muted) this._dispatch(setVolume(0))
+      else this._dispatch(setVolume(this._ref.volume))
     })
 
     this._listeners = []
@@ -104,6 +106,7 @@ export class Kokoro {
       item.unsub()
     }
     this.unmount()
+    this._ref.removeAttribute('src')
     this._ref.load()
   }
 
@@ -149,7 +152,11 @@ export class Kokoro {
   _onSrcProbablyChanged () {
     const state = this.getState()
     if (Song.id(state.playing) !== Song.id(this._ref)) {
-      this._ref.src = state.playing.src
+      if (state.playing.src) this._ref.src = state.playing.src
+      else {
+        this._ref.removeAttribute('src')
+        this._ref.load()
+      }
     }
   }
 

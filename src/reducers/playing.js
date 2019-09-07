@@ -13,7 +13,7 @@ import {
 } from '../actions'
 
 const initialState = {
-  src: null,
+  src: '',
   srcIndex: 0,
   song: null,
   currentTime: 0,

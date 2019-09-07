@@ -666,7 +666,7 @@ function playlist () {
 }
 
 var initialState$2 = {
-  src: null,
+  src: '',
   srcIndex: 0,
   song: null,
   currentTime: 0,
@@ -823,6 +823,8 @@ function () {
     this._ref.addEventListener('error', function () {
       var state = _this.getState();
 
+      if (state.playing.song === null) return;
+
       if (state.playing.song.src instanceof Array && state.playing.srcIndex + 1 < state.playing.song.src.length) {
         _this._dispatch(nextSrc());
       } else {
@@ -863,7 +865,7 @@ function () {
     });
 
     this._ref.addEventListener('volumechange', function () {
-      _this._dispatch(setVolume(_this._ref.volume));
+      if (_this._ref.muted) _this._dispatch(setVolume(0));else _this._dispatch(setVolume(_this._ref.volume));
     });
 
     this._listeners = [];
@@ -898,6 +900,8 @@ function () {
       }
 
       this.unmount();
+
+      this._ref.removeAttribute('src');
 
       this._ref.load();
     }
@@ -965,7 +969,11 @@ function () {
       var state = this.getState();
 
       if (Song.id(state.playing) !== Song.id(this._ref)) {
-        this._ref.src = state.playing.src;
+        if (state.playing.src) this._ref.src = state.playing.src;else {
+          this._ref.removeAttribute('src');
+
+          this._ref.load();
+        }
       }
     }
   }, {

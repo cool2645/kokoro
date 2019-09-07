@@ -94,7 +94,7 @@ export interface IPlayerState {
 }
 
 export interface IPlayingState {
-  src: string | null
+  src: string
   srcIndex: number
   song: ISong | null
   currentTime: number
