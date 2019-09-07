@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
-import { cloneDeep } from 'lodash-es'
 
+import { cloneDeep } from '../helpers'
 import player from './player'
 import playlist from './playlist'
 import playing, { initialPlayingState } from './playing'

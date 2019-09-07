@@ -8,7 +8,6 @@ export default {
   external: [
     'redux',
     'redux-thunk',
-    'lodash-es',
     'redux-devtools-extension'
   ],
   output: [

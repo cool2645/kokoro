@@ -188,4 +188,6 @@ export namespace helpers {
     static toArray (timeRanges: DOMTimeRanges): ITimeRanges
   }
 
+  export function cloneDeep (obj: any): any
+
 }

@@ -10,7 +10,6 @@
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import { cloneDeep } from 'lodash-es';
 
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -103,6 +102,63 @@ function _nonIterableSpread() {
   throw new TypeError("Invalid attempt to spread non-iterable instance");
 }
 
+var Song =
+/*#__PURE__*/
+function () {
+  function Song() {
+    _classCallCheck(this, Song);
+  }
+
+  _createClass(Song, null, [{
+    key: "id",
+    value: function id(song) {
+      var src = song.src instanceof Array ? encodeURI(song.src[0]) : encodeURI(song.src);
+      var good = decodeURI(src);
+
+      while (good !== src) {
+        src = good;
+        good = decodeURI(src);
+      }
+
+      return encodeURI(good);
+    }
+  }]);
+
+  return Song;
+}();
+var TimeRanges =
+/*#__PURE__*/
+function () {
+  function TimeRanges() {
+    _classCallCheck(this, TimeRanges);
+  }
+
+  _createClass(TimeRanges, null, [{
+    key: "toArray",
+    value: function toArray(timeRanges) {
+      var length = timeRanges.length;
+      var arr = [];
+
+      for (var i = 0; i < length; i++) {
+        arr.push([timeRanges.start(i), timeRanges.end(i)]);
+      }
+
+      return arr;
+    }
+  }]);
+
+  return TimeRanges;
+}();
+function cloneDeep(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+var helpers = /*#__PURE__*/Object.freeze({
+  Song: Song,
+  TimeRanges: TimeRanges,
+  cloneDeep: cloneDeep
+});
+
 var SET_VOLUME = 'SET_VOLUME';
 var SET_SPEED = 'SET_SPEED';
 function setVolume(volume) {
@@ -177,59 +233,6 @@ var PLAY_ORDER_LOOP = 'PLAY_ORDER_LOOP';
 var PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE';
 var PLAY_ORDER_SHUFFLE = 'PLAY_ORDER_SHUFFLE';
 var PLAY_ORDER = [PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE];
-
-var Song =
-/*#__PURE__*/
-function () {
-  function Song() {
-    _classCallCheck(this, Song);
-  }
-
-  _createClass(Song, null, [{
-    key: "id",
-    value: function id(song) {
-      var src = song.src instanceof Array ? encodeURI(song.src[0]) : encodeURI(song.src);
-      var good = decodeURI(src);
-
-      while (good !== src) {
-        src = good;
-        good = decodeURI(src);
-      }
-
-      return encodeURI(good);
-    }
-  }]);
-
-  return Song;
-}();
-var TimeRanges =
-/*#__PURE__*/
-function () {
-  function TimeRanges() {
-    _classCallCheck(this, TimeRanges);
-  }
-
-  _createClass(TimeRanges, null, [{
-    key: "toArray",
-    value: function toArray(timeRanges) {
-      var length = timeRanges.length;
-      var arr = [];
-
-      for (var i = 0; i < length; i++) {
-        arr.push([timeRanges.start(i), timeRanges.end(i)]);
-      }
-
-      return arr;
-    }
-  }]);
-
-  return TimeRanges;
-}();
-
-var helpers = /*#__PURE__*/Object.freeze({
-  Song: Song,
-  TimeRanges: TimeRanges
-});
 
 var SET_PLAYLIST = 'SET_PLAYLIST';
 var CLEAR_PLAYLIST = 'CLEAR_PLAYLIST';

@@ -26,3 +26,7 @@ export class TimeRanges {
     return arr
   }
 }
+
+export function cloneDeep (obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
