@@ -178,6 +178,35 @@ var PLAY_ORDER_SINGLE = 'PLAY_ORDER_SINGLE';
 var PLAY_ORDER_SHUFFLE = 'PLAY_ORDER_SHUFFLE';
 var PLAY_ORDER = [PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE];
 
+var Song =
+/*#__PURE__*/
+function () {
+  function Song() {
+    _classCallCheck(this, Song);
+  }
+
+  _createClass(Song, null, [{
+    key: "id",
+    value: function id(song) {
+      var src = song.src instanceof Array ? encodeURI(song.src[0]) : encodeURI(song.src);
+      var good = decodeURI(src);
+
+      while (good !== src) {
+        src = good;
+        good = decodeURI(src);
+      }
+
+      return encodeURI(good);
+    }
+  }]);
+
+  return Song;
+}();
+
+var helpers = /*#__PURE__*/Object.freeze({
+  Song: Song
+});
+
 var SET_PLAYLIST = 'SET_PLAYLIST';
 var CLEAR_PLAYLIST = 'CLEAR_PLAYLIST';
 
@@ -208,10 +237,6 @@ function pushHistory(historyList, song) {
 
   newHistoryList.unshift(song);
   return newHistoryList;
-}
-
-function id(song) {
-  return song.src instanceof Array ? song.src[0] : song.src;
 }
 
 function setPlayOrder(playOrder) {
@@ -335,7 +360,7 @@ function setCurrentSong(song) {
     } else if (typeof song === 'string') {
       songId = song;
     } else {
-      songId = id(song);
+      songId = Song.id(song);
       newPlaylistState.songs[songId] = song;
 
       if (playlist.orderedList.indexOf(songId) === -1) {
@@ -369,7 +394,7 @@ function setNextSong(song) {
     } else if (typeof song === 'string') {
       songId = song;
     } else {
-      songId = id(song);
+      songId = Song.id(song);
       newPlaylistState.songs[songId] = song;
     }
 
@@ -404,7 +429,7 @@ function removeSong(song) {
     } else if (typeof song === 'string') {
       songId = song;
     } else {
-      songId = id(song);
+      songId = Song.id(song);
     }
 
     var orderedIndexReduction = playlist.orderedList.slice(0, playlist.orderedIndexOfPlaying).filter(function (item) {
@@ -455,7 +480,7 @@ function setPlaylist(songs, currentSong, playOrder) {
       for (var _iterator = songs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
         var song = _step.value;
 
-        var _songId = id(song);
+        var _songId = Song.id(song);
 
         newPlaylistState.songs[_songId] = song;
         newPlaylistState.orderedList.push(_songId);
@@ -484,7 +509,7 @@ function setPlaylist(songs, currentSong, playOrder) {
         } else if (typeof currentSong === 'string') {
           songId = currentSong;
         } else {
-          songId = id(currentSong);
+          songId = Song.id(currentSong);
         }
 
         newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.indexOf(songId);
@@ -505,7 +530,11 @@ function setPlaylist(songs, currentSong, playOrder) {
           newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
         }
       }
+
+      newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
     }
+
+    dispatch(createSetPlaylistAction(newPlaylistState));
   };
 }
 function clearPlaylist() {
@@ -559,7 +588,7 @@ function player () {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
-  switch (action) {
+  switch (action.type) {
     case SET_VOLUME:
       if (typeof action.payload !== 'number') {
         return state;
@@ -599,7 +628,7 @@ function playlist () {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState$1;
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
-  switch (action) {
+  switch (action.type) {
     case SET_PLAYLIST:
       return cloneDeep(action.payload);
 
@@ -626,19 +655,16 @@ function playing () {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState$2;
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
-  switch (action) {
+  switch (action.type) {
     case CLEAR_PLAYLIST:
       return cloneDeep(initialState$2);
 
     case SET_PLAYLIST:
-      return {
-        currentTime: 0,
-        totalTime: 0,
-        paused: state.paused,
+      return _objectSpread2({}, state, {
         song: cloneDeep(action.payload.songs[action.payload.playing]),
         src: action.payload.songs[action.payload.playing].src instanceof Array ? action.payload.songs[action.payload.playing].src[0] : action.payload.songs[action.payload.playing].src,
         srcIndex: 0
-      };
+      });
 
     case NEXT_SRC:
       {
@@ -646,8 +672,6 @@ function playing () {
 
         if (srcId !== state.srcIndex && state.song.src instanceof Array) {
           return _objectSpread2({}, cloneDeep(state), {
-            currentTime: 0,
-            totalTime: 0,
             srcIndex: srcId,
             src: state.song.src[srcId]
           });
@@ -852,6 +876,8 @@ function () {
         _this2._dispatch(autoNext());
 
         _this2._onSrcProbablyChanged();
+
+        _this2._triggerPlay();
       });
 
       this._ref.addEventListener('error', function () {
@@ -864,6 +890,8 @@ function () {
         }
 
         _this2._onSrcProbablyChanged();
+
+        _this2._triggerPlay();
       });
 
       this._ref.addEventListener('loadedmetadata', function () {
@@ -910,11 +938,16 @@ function () {
     value: function _onSrcProbablyChanged() {
       var state = this.getState();
 
-      if (state.playing.src !== this._ref.src) {
+      if (Song.id(state.playing) !== Song.id(this._ref)) {
         this._ref.src = state.playing.src;
       }
+    }
+  }, {
+    key: "_triggerPlay",
+    value: function _triggerPlay() {
+      this._ref.currentTime = 0;
 
-      this._ref.currentTime = state.playing.currentTime;
+      this._ref.play();
     }
   }, {
     key: "pause",
@@ -946,6 +979,8 @@ function () {
       this._dispatch(next());
 
       this._onSrcProbablyChanged();
+
+      this._triggerPlay();
     }
   }, {
     key: "previous",
@@ -953,6 +988,8 @@ function () {
       this._dispatch(previous());
 
       this._onSrcProbablyChanged();
+
+      this._triggerPlay();
     }
   }, {
     key: "setPlayOrder",
@@ -970,6 +1007,8 @@ function () {
       this._dispatch(setCurrentSong(song));
 
       this._onSrcProbablyChanged();
+
+      this._triggerPlay();
     }
   }, {
     key: "setNextSong",
@@ -1013,5 +1052,5 @@ function () {
 }();
 
 export default Kokoro;
-export { Kokoro, LYRICS_TYPE_L2C, LYRICS_TYPE_LRC, PLAY_ORDER, PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE, index as actions };
+export { Kokoro, LYRICS_TYPE_L2C, LYRICS_TYPE_LRC, PLAY_ORDER, PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE, index as actions, helpers };
 //# sourceMappingURL=kokoro.esm.js.map

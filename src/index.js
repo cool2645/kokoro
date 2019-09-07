@@ -14,6 +14,7 @@ import {
   setTotalTime,
   setVolume
 } from './actions'
+import { Song } from './helpers'
 
 const defaultOptions = {
   audioTagId: 'kokoro-sevice',
@@ -95,6 +96,7 @@ export class Kokoro {
     this._ref.addEventListener('ended', () => {
       this._dispatch(autoNext())
       this._onSrcProbablyChanged()
+      this._triggerPlay()
     })
     this._ref.addEventListener('error', () => {
       const state = this.getState()
@@ -105,6 +107,7 @@ export class Kokoro {
         this._dispatch(autoNext())
       }
       this._onSrcProbablyChanged()
+      this._triggerPlay()
     })
     this._ref.addEventListener('loadedmetadata', () => {
       this._dispatch(setTotalTime(this._ref.duration))
@@ -141,10 +144,14 @@ export class Kokoro {
 
   _onSrcProbablyChanged () {
     const state = this.getState()
-    if (state.playing.src !== this._ref.src) {
+    if (Song.id(state.playing) !== Song.id(this._ref)) {
       this._ref.src = state.playing.src
     }
-    this._ref.currentTime = state.playing.currentTime
+  }
+
+  _triggerPlay () {
+    this._ref.currentTime = 0
+    this._ref.play()
   }
 
   pause () {
@@ -169,11 +176,13 @@ export class Kokoro {
   next () {
     this._dispatch(next())
     this._onSrcProbablyChanged()
+    this._triggerPlay()
   }
 
   previous () {
     this._dispatch(previous())
     this._onSrcProbablyChanged()
+    this._triggerPlay()
   }
 
   setPlayOrder (playOrder) {
@@ -187,6 +196,7 @@ export class Kokoro {
   setCurrentSong (song) {
     this._dispatch(setCurrentSong(song))
     this._onSrcProbablyChanged()
+    this._triggerPlay()
   }
 
   setNextSong (song) {
@@ -221,3 +231,4 @@ export default Kokoro
 
 export * from './constants'
 export * as actions from './actions'
+export * as helpers from './helpers'

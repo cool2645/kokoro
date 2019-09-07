@@ -15,7 +15,7 @@ const initialState = {
 }
 
 export default function (state = initialState, action) {
-  switch (action) {
+  switch (action.type) {
     case SET_PLAYLIST:
       return cloneDeep(action.payload)
     case CLEAR_PLAYLIST:

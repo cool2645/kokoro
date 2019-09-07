@@ -1,4 +1,5 @@
 import { PLAY_ORDER, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE } from '../constants'
+import { Song } from '../helpers'
 
 export const SET_PLAYLIST = 'SET_PLAYLIST'
 export const CLEAR_PLAYLIST = 'CLEAR_PLAYLIST'
@@ -24,12 +25,6 @@ function pushHistory (historyList, song) {
   }
   newHistoryList.unshift(song)
   return newHistoryList
-}
-
-function id (song) {
-  return song.src instanceof Array
-    ? song.src[0]
-    : song.src
 }
 
 export function setPlayOrder (playOrder) {
@@ -130,7 +125,7 @@ export function setCurrentSong (song) {
     } else if (typeof song === 'string') {
       songId = song
     } else {
-      songId = id(song)
+      songId = Song.id(song)
       newPlaylistState.songs[songId] = song
       if (playlist.orderedList.indexOf(songId) === -1) {
         newPlaylistState.orderedList.splice(
@@ -159,7 +154,7 @@ export function setNextSong (song) {
     } else if (typeof song === 'string') {
       songId = song
     } else {
-      songId = id(song)
+      songId = Song.id(song)
       newPlaylistState.songs[songId] = song
     }
     if (songId !== playlist.playing) {
@@ -192,7 +187,7 @@ export function removeSong (song) {
     } else if (typeof song === 'string') {
       songId = song
     } else {
-      songId = id(song)
+      songId = Song.id(song)
     }
     const orderedIndexReduction = playlist.orderedList.slice(0, playlist.orderedIndexOfPlaying)
       .filter(item => item === songId).length
@@ -228,7 +223,7 @@ export function setPlaylist (songs, currentSong, playOrder) {
       playOrder: playOrder || playlist.playOrder
     }
     for (const song of songs) {
-      const songId = id(song)
+      const songId = Song.id(song)
       newPlaylistState.songs[songId] = song
       newPlaylistState.orderedList.push(songId)
     }
@@ -240,7 +235,7 @@ export function setPlaylist (songs, currentSong, playOrder) {
         } else if (typeof currentSong === 'string') {
           songId = currentSong
         } else {
-          songId = id(currentSong)
+          songId = Song.id(currentSong)
         }
         newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.indexOf(songId)
         if (newPlaylistState.playOrder === PLAY_ORDER_SHUFFLE) {
@@ -259,7 +254,9 @@ export function setPlaylist (songs, currentSong, playOrder) {
           newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying]
         }
       }
+      newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing)
     }
+    dispatch(createSetPlaylistAction(newPlaylistState))
   }
 }
 

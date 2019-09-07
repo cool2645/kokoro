@@ -25,14 +25,12 @@ const initialState = {
 export { initialState as initialPlayingState }
 
 export default function (state = initialState, action) {
-  switch (action) {
+  switch (action.type) {
     case CLEAR_PLAYLIST:
       return cloneDeep(initialState)
     case SET_PLAYLIST:
       return {
-        currentTime: 0,
-        totalTime: 0,
-        paused: state.paused,
+        ...state,
         song: cloneDeep(action.payload.songs[action.payload.playing]),
         src: action.payload.songs[action.payload.playing].src instanceof Array
           ? action.payload.songs[action.payload.playing].src[0]
@@ -47,8 +45,6 @@ export default function (state = initialState, action) {
       if (srcId !== state.srcIndex && state.song.src instanceof Array) {
         return {
           ...cloneDeep(state),
-          currentTime: 0,
-          totalTime: 0,
           srcIndex: srcId,
           src: state.song.src[srcId]
         }
