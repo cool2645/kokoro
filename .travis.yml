@@ -11,6 +11,7 @@ install:
   - yarn install
 script:
   - yarn build
+  - yarn cov
 after_success:
   - cd docs
   - echo "kokoro.js.org" > CNAME
