@@ -13,6 +13,7 @@ script:
   - yarn build
   - yarn cov
 after_success:
+  - cp -r dist docs
   - cd docs
   - echo "kokoro.js.org" > CNAME
   - git init

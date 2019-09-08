@@ -16,15 +16,16 @@ Visit it [here](https://kokoro.js.org).
 
 ## 🚀 Quick Start
 
-1. Open console.
-2. Copy and paste the following code snippet.
+1. Go to [documentation](https://kokoro.js.org) page.
+2. Open console.
+3. Copy and paste the following code snippet.
     ```javascript
     let script = document.createElement('script')
-    script.src = 'https://unpkg.com/kokoro'
+    script.src = '/dist/kokoro.min.js'
     document.body.appendChild(script)
     window.player = new Kokoro()
     ```
-3. You're ready to go now! Look up to kokoro's [API doc](https://kokoro.js.org/classes/kokoro.html)
+4. You're ready to go now! Look up to kokoro's [API](https://kokoro.js.org/classes/kokoro.html)
 and try to play a song.
 
 ## 💡 FAQ

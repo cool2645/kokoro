@@ -11,7 +11,7 @@ module.exports = (env, argv) => ({
   entry: argv.mode === 'development' ? path.join(__dirname, 'example', 'index.js')
     : path.join(__dirname, 'src', 'index.js'),
   output: {
-    library: 'kokoro',
+    library: 'Kokoro',
     libraryTarget: 'umd',
     libraryExport: 'default',
     path: path.join(__dirname, 'dist'),
