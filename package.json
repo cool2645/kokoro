@@ -1,6 +1,6 @@
 {
   "name": "kokoro",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.3",
   "description": "Headless music player written with Redux.",
   "main": "dist/kokoro.min.js",
   "module": "dist/kokoro.esm.js",
