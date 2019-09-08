@@ -13,6 +13,7 @@ export declare class Kokoro {
   readonly ref: HTMLAudioElement
   readonly store: Store<IState>
   readonly destroyed: boolean
+  readonly version: string
 
   protected _onSrcProbablyChanged (): void
   protected _triggerPlay (): void

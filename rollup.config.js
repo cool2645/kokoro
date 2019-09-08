@@ -1,5 +1,6 @@
 import babel from 'rollup-plugin-babel'
 import nodeResolve from 'rollup-plugin-node-resolve'
+import json from 'rollup-plugin-json'
 
 import pkg from './package.json'
 
@@ -28,6 +29,7 @@ export default {
   ],
   plugins: [
     babel(),
-    nodeResolve()
+    nodeResolve(),
+    json()
   ]
 }

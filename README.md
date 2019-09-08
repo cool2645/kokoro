@@ -22,8 +22,11 @@ Visit it [here](https://kokoro.js.org).
     ```javascript
     let script = document.createElement('script')
     script.src = '/dist/kokoro.min.js'
+    script.onload = () => {
+      window.player = new Kokoro()
+      console.log(`Initialized player instance of kokoro v${window.player.version}.`)
+    }
     document.body.appendChild(script)
-    window.player = new Kokoro()
     ```
 4. You're ready to go now! Look up to kokoro's [API](https://kokoro.js.org/classes/kokoro.html)
 and try to play a song.

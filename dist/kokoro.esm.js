@@ -1,7 +1,7 @@
 /*!
  * kokoro - Headless music player written with Redux.
  * --------
- * @version 0.0.1
+ * @version 0.1.0-beta.1
  * @homepage: https://github.com/cool2645/kokoro#readme
  * @license MIT
  * @author rikakomoe
@@ -102,6 +102,8 @@ function _nonIterableSpread() {
   throw new TypeError("Invalid attempt to spread non-iterable instance");
 }
 
+var version = "0.1.0-beta.1";
+
 var Song =
 /*#__PURE__*/
 function () {
@@ -176,7 +178,6 @@ function setSpeed(speedRate) {
 
 var PAUSE = 'PAUSE';
 var PLAY = 'PLAY';
-var TOGGLE_PLAY = 'TOGGLE_PLAY';
 var SET_CURRENT_TIME = 'SET_CURRENT_TIME';
 var SET_TOTAL_TIME = 'SET_TOTAL_TIME';
 var SET_BUFFERED_TIME = 'SET_BUFFERED_TIME';
@@ -190,11 +191,6 @@ function pause() {
 function play() {
   return {
     type: PLAY
-  };
-}
-function togglePlay() {
-  return {
-    type: TOGGLE_PLAY
   };
 }
 function setCurrentTime(time) {
@@ -252,6 +248,8 @@ function createSetPlaylistAction(payload) {
 }
 
 function pushHistory(historyList, song) {
+  if (!song) return historyList;
+
   var newHistoryList = _toConsumableArray(historyList);
 
   var historyIndex = historyList.indexOf(song);
@@ -351,7 +349,7 @@ function previous() {
 
         (_newPlaylistState$shu2 = newPlaylistState.shuffledList).unshift.apply(_newPlaylistState$shu2, _toConsumableArray(shuffle(playlist.orderedList)));
 
-        newPlaylistState.shuffledIndexOfPlaying += playlist.orderedList;
+        newPlaylistState.shuffledIndexOfPlaying += playlist.orderedList.length;
       }
 
       newPlaylistState.shuffledIndexOfPlaying--;
@@ -424,15 +422,16 @@ function setNextSong(song) {
     }
 
     if (songId !== playlist.playing) {
-      var orderedIndex = playlist.orderedList.indexOf(songId);
-
-      if (orderedIndex !== -1) {
-        newPlaylistState.orderedList.splice(orderedIndex, 1);
-      }
-
-      newPlaylistState.orderedList.splice(newPlaylistState.orderedIndexOfPlaying + 1, 0, songId);
-
-      if (playlist.playOrder === PLAY_ORDER_SHUFFLE && !(playlist.shuffledIndexOfPlaying + 1 < playlist.shuffledList.length && playlist.shuffledList[playlist.shuffledIndexOfPlaying + 1] === songId)) {
+      if (playlist.playOrder !== PLAY_ORDER_SHUFFLE) {
+        var orderedIndexReduction = playlist.orderedList.slice(0, playlist.orderedIndexOfPlaying).filter(function (item) {
+          return item === songId;
+        }).length;
+        newPlaylistState.orderedList = playlist.orderedList.filter(function (item) {
+          return item !== songId;
+        });
+        newPlaylistState.orderedIndexOfPlaying -= orderedIndexReduction;
+        newPlaylistState.orderedList.splice(newPlaylistState.orderedIndexOfPlaying + 1, 0, songId);
+      } else if (playlist.playOrder === PLAY_ORDER_SHUFFLE && !(playlist.shuffledIndexOfPlaying + 1 < playlist.shuffledList.length && playlist.shuffledList[playlist.shuffledIndexOfPlaying + 1] === songId)) {
         newPlaylistState.shuffledList.splice(playlist.shuffledIndexOfPlaying + 1, 0, songId);
       }
     }
@@ -471,13 +470,22 @@ function removeSong(song) {
       newPlaylistState.shuffledList = playlist.shuffledList.filter(function (item) {
         return item !== songId;
       });
-      newPlaylistState.shuffledIndexOfPlaying = playlist.shuffledIndexOfPlaying - shuffledIndexReduction;
-      newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.indexOf(newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying]);
+      newPlaylistState.shuffledIndexOfPlaying -= shuffledIndexReduction;
+
+      if (newPlaylistState.shuffledIndexOfPlaying >= newPlaylistState.shuffledList.length) {
+        newPlaylistState.shuffledIndexOfPlaying = newPlaylistState.shuffledList.length - 1 > 0 ? newPlaylistState.shuffledList.length - 1 : 0;
+      }
+
+      newPlaylistState.orderedIndexOfPlaying = newPlaylistState.shuffledList.length - 1 > 0 ? newPlaylistState.orderedList.indexOf(newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying]) : 0;
     } else {
-      newPlaylistState.orderedIndexOfPlaying = playlist.orderedIndexOfPlaying - orderedIndexReduction;
+      newPlaylistState.orderedIndexOfPlaying -= orderedIndexReduction;
+
+      if (newPlaylistState.orderedIndexOfPlaying >= newPlaylistState.orderedList.length) {
+        newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.length - 1 > 0 ? newPlaylistState.orderedList.length - 1 : 0;
+      }
     }
 
-    newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
+    newPlaylistState.playing = newPlaylistState.orderedList.length ? newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying] : null;
     newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
     dispatch(createSetPlaylistAction(newPlaylistState));
   };
@@ -526,17 +534,21 @@ function setPlaylist(songs, currentSong, playOrder) {
     }
 
     if (newPlaylistState.orderedList.length) {
-      if (currentSong) {
-        var songId;
+      var songId;
+      var currentSongValid = false;
 
-        if (typeof currentSong === 'number') {
-          songId = newPlaylistState.orderedList[currentSong];
-        } else if (typeof currentSong === 'string') {
-          songId = currentSong;
-        } else {
-          songId = Song.id(currentSong);
-        }
+      if (typeof currentSong === 'number') {
+        songId = newPlaylistState.orderedList[currentSong];
+        currentSongValid = true;
+      } else if (typeof currentSong === 'string') {
+        songId = currentSong;
+        currentSongValid = true;
+      } else if (currentSong) {
+        songId = Song.id(currentSong);
+        currentSongValid = true;
+      }
 
+      if (currentSongValid) {
         newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.indexOf(songId);
 
         if (newPlaylistState.playOrder === PLAY_ORDER_SHUFFLE) {
@@ -578,7 +590,6 @@ var index = /*#__PURE__*/Object.freeze({
   setSpeed: setSpeed,
   PAUSE: PAUSE,
   PLAY: PLAY,
-  TOGGLE_PLAY: TOGGLE_PLAY,
   SET_CURRENT_TIME: SET_CURRENT_TIME,
   SET_TOTAL_TIME: SET_TOTAL_TIME,
   SET_BUFFERED_TIME: SET_BUFFERED_TIME,
@@ -586,7 +597,6 @@ var index = /*#__PURE__*/Object.freeze({
   NEXT_SRC: NEXT_SRC,
   pause: pause,
   play: play,
-  togglePlay: togglePlay,
   setCurrentTime: setCurrentTime,
   setTotalTime: setTotalTime,
   setBufferedTime: setBufferedTime,
@@ -616,19 +626,11 @@ function player () {
 
   switch (action.type) {
     case SET_VOLUME:
-      if (typeof action.payload !== 'number') {
-        return state;
-      }
-
       return _objectSpread2({}, state, {
         volume: action.payload
       });
 
     case SET_SPEED:
-      if (typeof action.payload !== 'number') {
-        return state;
-      }
-
       return _objectSpread2({}, state, {
         speed: action.payload
       });
@@ -685,21 +687,25 @@ function playing () {
 
     case SET_PLAYLIST:
       return _objectSpread2({}, state, {
-        song: cloneDeep(action.payload.songs[action.payload.playing]),
-        src: action.payload.songs[action.payload.playing].src instanceof Array ? action.payload.songs[action.payload.playing].src[0] : action.payload.songs[action.payload.playing].src,
+        song: action.payload.playing ? cloneDeep(action.payload.songs[action.payload.playing]) : null,
+        src: action.payload.playing ? action.payload.songs[action.payload.playing].src instanceof Array ? action.payload.songs[action.payload.playing].src[0] : action.payload.songs[action.payload.playing].src : '',
         srcIndex: 0
       });
 
     case NEXT_SRC:
       {
-        var srcId = state.song.src instanceof Array ? state.srcIndex + 1 < state.song.src.length ? state.srcIndex + 1 : 0 : 0;
+        // condition is always true
+        // const srcId = state.song.src instanceof Array
+        //  ? state.srcIndex + 1 < state.song.src.length
+        //    ? state.srcIndex + 1 : 0
+        //  : 0
+        var srcId = state.srcIndex + 1; // if (srcId !== state.srcIndex && state.song.src instanceof Array) {
 
-        if (srcId !== state.srcIndex && state.song.src instanceof Array) {
-          return _objectSpread2({}, cloneDeep(state), {
-            srcIndex: srcId,
-            src: state.song.src[srcId]
-          });
-        } else return state;
+        return _objectSpread2({}, cloneDeep(state), {
+          srcIndex: srcId,
+          src: state.song.src[srcId] // } else return state
+
+        });
       }
 
     case SET_CURRENT_TIME:
@@ -734,11 +740,6 @@ function playing () {
         paused: false
       });
 
-    case TOGGLE_PLAY:
-      return _objectSpread2({}, cloneDeep(state), {
-        paused: !state.paused
-      });
-
     default:
       return state;
   }
@@ -755,11 +756,10 @@ function saveState(state) {
   return exportedState;
 }
 function loadState(state) {
-  if (!state) return undefined;
   var importedState = cloneDeep(state);
   importedState.playing = initialState$2;
-  importedState.playing.song = importedState.playlist.songs[importedState.playlist.playing];
-  importedState.playing.src = importedState.playing.song.src instanceof Array ? importedState.playing.song.src[0] : importedState.playing.song.src;
+  importedState.playing.song = importedState.playlist.playing ? importedState.playlist.songs[importedState.playlist.playing] : null;
+  importedState.playing.src = importedState.playing.song ? importedState.playing.song.src instanceof Array ? importedState.playing.song.src[0] : importedState.playing.song.src : null;
   return importedState;
 }
 
@@ -790,6 +790,11 @@ function () {
     key: "destroyed",
     get: function get() {
       return this._destroyed || false;
+    }
+  }, {
+    key: "version",
+    get: function get() {
+      return version;
     }
   }]);
 
@@ -900,6 +905,7 @@ function () {
         }
       }
 
+      this._listeners = [];
       this.unmount();
 
       this._ref.removeAttribute('src');

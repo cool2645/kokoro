@@ -1,5 +1,6 @@
 import Kokoro from '../src'
 import './dom.mock'
+import { version } from '../package'
 
 describe('class state test', () => {
   let kokoro = new Kokoro()
@@ -15,6 +16,9 @@ describe('class state test', () => {
       'https://m10.music.126.net/20190907220812/bf90964e93d2ff771c36a7d2d9053972/ymusic/7edf/41ea/0302/6dbeaf542ffb22cf537ab7bef86cd275.mp3'
     ]
   }]
+  it('should show version', () => {
+    expect(kokoro.version).toEqual(version)
+  })
   it('should get store', () => {
     const store = kokoro.store
     expect(store.getState()).toEqual(kokoro.getState())

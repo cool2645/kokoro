@@ -2,6 +2,7 @@ import { applyMiddleware, createStore } from 'redux'
 import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
 
+import { version } from '../package'
 import reducers, { loadState, saveState } from './reducers'
 import {
   autoNext, clearPlaylist, next, nextPlayOrder,
@@ -35,6 +36,10 @@ export class Kokoro {
 
   get destroyed () {
     return this._destroyed || false
+  }
+
+  get version () {
+    return version
   }
 
   constructor (initializeState) {
