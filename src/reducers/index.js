@@ -18,12 +18,14 @@ export function saveState (state) {
 }
 
 export function loadState (state) {
-  if (!state) return undefined
   const importedState = cloneDeep(state)
   importedState.playing = initialPlayingState
-  importedState.playing.song = importedState.playlist.songs[importedState.playlist.playing]
-  importedState.playing.src = importedState.playing.song.src instanceof Array
-    ? importedState.playing.song.src[0]
-    : importedState.playing.song.src
+  importedState.playing.song = importedState.playlist.playing
+    ? importedState.playlist.songs[importedState.playlist.playing] : null
+  importedState.playing.src = importedState.playing.song
+    ? importedState.playing.song.src instanceof Array
+      ? importedState.playing.song.src[0]
+      : importedState.playing.song.src
+    : null
   return importedState
 }

@@ -547,4 +547,37 @@ describe('playlist state test', () => {
     })
     expect(kokoro.getState().playing.src).toEqual('new Song')
   })
+
+  it('should be able to set nothing', () => {
+    kokoro.setPlaylist([])
+  })
+
+  it('should set next song', () => {
+    kokoro.setPlaylist(playlist, 1, PLAY_ORDER_SHUFFLE)
+    kokoro.setNextSong(playlist[3])
+    expect(kokoro.getState().playlist.shuffledList).toEqual([
+      'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
+      'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
+      'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
+      'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
+    ])
+  })
+
+  it('should remove song', () => {
+    kokoro.setPlaylist(playlist, 0, PLAY_ORDER_SHUFFLE)
+    kokoro.removeSong(0)
+    expect(kokoro.getState().playing.src).toEqual('https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3')
+    kokoro.setPlayOrder(PLAY_ORDER_LOOP)
+    kokoro.setCurrentSong(2)
+    kokoro.removeSong(2)
+    expect(kokoro.getState().playing.src).toEqual('https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3')
+    kokoro.removeSong(1)
+    expect(kokoro.getState().playing.src).toEqual('https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3')
+    kokoro.removeSong(0)
+    expect(kokoro.getState().playing.src).toEqual('')
+  })
+
+  it('should stop', () => {
+    kokoro.ref.dispatchEvent(new Event('error'))
+  })
 })

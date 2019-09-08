@@ -105,6 +105,7 @@ export class Kokoro {
     for (const item of this._listeners) {
       item.unsub()
     }
+    this._listeners = []
     this.unmount()
     this._ref.removeAttribute('src')
     this._ref.load()

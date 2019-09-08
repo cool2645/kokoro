@@ -16,6 +16,14 @@ describe('player related api test', () => {
     expect(kokoro.getState().player.volume).toEqual(0)
   })
 
+  it('should mute', () => {
+    kokoro.setVolume(1)
+    kokoro.ref.muted = true
+    kokoro.ref.dispatchEvent(new Event('mute'))
+    expect(kokoro.ref.muted).toEqual(true)
+    expect(kokoro.getState().player.volume).toEqual(0)
+  })
+
   it('should set speed', () => {
     kokoro.setSpeed(1.5)
     expect(kokoro.ref.playbackRate).toEqual(1.5)

@@ -26,6 +26,9 @@ describe('playing related api test', () => {
     kokoro.togglePlay()
     expect(kokoro.ref.paused).toEqual(false)
     expect(kokoro.getState().playing.paused).toEqual(false)
+    kokoro.togglePlay()
+    expect(kokoro.ref.paused).toEqual(true)
+    expect(kokoro.getState().playing.paused).toEqual(true)
   })
 
   it('should update on its time', () => {

@@ -211,7 +211,7 @@ export function removeSong (song) {
       newPlaylistState.orderedIndexOfPlaying -= orderedIndexReduction
       if (newPlaylistState.orderedIndexOfPlaying >= newPlaylistState.orderedList.length) {
         newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.length - 1 > 0
-          ? playlist.orderedList.length - 1 : 0
+          ? newPlaylistState.orderedList.length - 1 : 0
       }
     }
     newPlaylistState.playing = newPlaylistState.orderedList.length
@@ -240,15 +240,19 @@ export function setPlaylist (songs, currentSong, playOrder) {
       newPlaylistState.orderedList.push(songId)
     }
     if (newPlaylistState.orderedList.length) {
-      if (currentSong) {
-        let songId
-        if (typeof currentSong === 'number') {
-          songId = newPlaylistState.orderedList[currentSong]
-        } else if (typeof currentSong === 'string') {
-          songId = currentSong
-        } else {
-          songId = Song.id(currentSong)
-        }
+      let songId
+      let currentSongValid = false
+      if (typeof currentSong === 'number') {
+        songId = newPlaylistState.orderedList[currentSong]
+        currentSongValid = true
+      } else if (typeof currentSong === 'string') {
+        songId = currentSong
+        currentSongValid = true
+      } else if (currentSong) {
+        songId = Song.id(currentSong)
+        currentSongValid = true
+      }
+      if (currentSongValid) {
         newPlaylistState.orderedIndexOfPlaying = newPlaylistState.orderedList.indexOf(songId)
         if (newPlaylistState.playOrder === PLAY_ORDER_SHUFFLE) {
           newPlaylistState.shuffledList = shuffle(newPlaylistState.orderedList)
