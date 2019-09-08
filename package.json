@@ -7,7 +7,7 @@
   "scripts": {
     "develop": "webpack-dev-server --mode development",
     "build": "rollup -c && webpack",
-    "version": "webpack",
+    "version": "rollup -c && webpack",
     "test": "jest --coverage",
     "cov": "jest --coverage --coverageReporters=text-lcov | coveralls",
     "lint": "eslint --fix .",
