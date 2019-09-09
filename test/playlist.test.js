@@ -1,8 +1,9 @@
-import { mockRandomForEach } from 'jest-mock-random'
+import { mockRandomForEach, mockRandom } from 'jest-mock-random'
 
 import Kokoro, { PLAY_ORDER_LOOP, PLAY_ORDER_SHUFFLE, PLAY_ORDER_SINGLE } from '../src'
 import './dom.mock'
 import { Song } from '../src/helpers'
+import { autoNext } from '../src/actions'
 
 describe('playlist state test', () => {
   mockRandomForEach([0.2, 0.6, 0.4, 0.5])
@@ -585,5 +586,35 @@ describe('playlist state test', () => {
     kokoro.clearPlaylist()
     kokoro.setNextSong(playlist[0])
     expect(kokoro.getState().playing.src).toEqual('https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3')
+  })
+
+  it('should throw no error', () => {
+    kokoro.clearPlaylist()
+    kokoro.next()
+    expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(null)
+    kokoro.previous()
+    expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(null)
+    kokoro._dispatch(autoNext())
+    expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(null)
+    kokoro.setPlayOrder(PLAY_ORDER_SHUFFLE)
+    kokoro.next()
+    expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(null)
+    kokoro.previous()
+    expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(null)
+    kokoro._dispatch(autoNext())
+    expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(null)
+  })
+
+  it('should never play the same song twice', () => {
+    mockRandom([0.1, 0.1, 0.1, 0.1])
+    kokoro.setPlaylist(playlist, 0, PLAY_ORDER_SHUFFLE)
+    mockRandom([0.9, 0.9, 0.9, 0.9])
+    kokoro.next()
+    expect(kokoro.getState().orderedIndexOfPlaying).not.toEqual(3)
+    mockRandom([0.1, 0.1, 0.1, 0.1])
+    kokoro.setPlaylist(playlist, 3, PLAY_ORDER_SHUFFLE)
+    mockRandom([0.9, 0.9, 0.9, 0.9])
+    kokoro.previous()
+    expect(kokoro.getState().orderedIndexOfPlaying).not.toEqual(0)
   })
 })

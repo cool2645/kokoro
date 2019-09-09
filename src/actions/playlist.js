@@ -10,6 +10,14 @@ function shuffle (original) {
   return shuffled
 }
 
+function swap (original) {
+  const swapped = [...original]
+  const a = swapped[0]
+  swapped[0] = swapped[swapped.length - 1]
+  swapped[swapped.length - 1] = a
+  return swapped
+}
+
 function createSetPlaylistAction (payload) {
   return {
     type: SET_PLAYLIST,
@@ -60,22 +68,28 @@ export function next () {
   return (dispatch, getState) => {
     const { playlist } = getState()
     const newPlaylistState = { ...playlist }
-    if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
-      if (playlist.shuffledIndexOfPlaying + 1 === playlist.shuffledList.length) {
-        newPlaylistState.shuffledList.push(...shuffle(playlist.orderedList))
-      }
-      newPlaylistState.shuffledIndexOfPlaying++
-      newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying]
-      newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing)
-    } else {
-      if (playlist.orderedIndexOfPlaying + 1 === playlist.orderedList.length) {
-        newPlaylistState.orderedIndexOfPlaying = 0
+    if (playlist.orderedList.length) {
+      if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
+        if (playlist.shuffledIndexOfPlaying + 1 === playlist.shuffledList.length) {
+          let newShuffledList = shuffle(playlist.orderedList)
+          if (newShuffledList[0] === playlist.shuffledList[playlist.shuffledList.length - 1]) {
+            newShuffledList = swap(newShuffledList)
+          }
+          newPlaylistState.shuffledList.push(...newShuffledList)
+        }
+        newPlaylistState.shuffledIndexOfPlaying++
+        newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying]
+        newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing)
       } else {
-        newPlaylistState.orderedIndexOfPlaying++
+        if (playlist.orderedIndexOfPlaying + 1 >= playlist.orderedList.length) {
+          newPlaylistState.orderedIndexOfPlaying = 0
+        } else {
+          newPlaylistState.orderedIndexOfPlaying++
+        }
+        newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying]
       }
-      newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying]
+      newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing)
     }
-    newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing)
     dispatch(createSetPlaylistAction(newPlaylistState))
   }
 }
@@ -95,23 +109,29 @@ export function previous () {
   return (dispatch, getState) => {
     const { playlist } = getState()
     const newPlaylistState = { ...playlist }
-    if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
-      if (playlist.shuffledIndexOfPlaying - 1 === -1) {
-        newPlaylistState.shuffledList.unshift(...shuffle(playlist.orderedList))
-        newPlaylistState.shuffledIndexOfPlaying += playlist.orderedList.length
-      }
-      newPlaylistState.shuffledIndexOfPlaying--
-      newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying]
-      newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing)
-    } else {
-      if (playlist.orderedIndexOfPlaying - 1 === -1) {
-        newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.length - 1
+    if (playlist.orderedList.length) {
+      if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
+        if (playlist.shuffledIndexOfPlaying - 1 === -1) {
+          let newShuffledList = shuffle(playlist.orderedList)
+          if (newShuffledList[newShuffledList.length - 1] === playlist.shuffledList[0]) {
+            newShuffledList = swap(newShuffledList)
+          }
+          newPlaylistState.shuffledList.unshift(...newShuffledList)
+          newPlaylistState.shuffledIndexOfPlaying += newShuffledList.length
+        }
+        newPlaylistState.shuffledIndexOfPlaying--
+        newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying]
+        newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing)
       } else {
-        newPlaylistState.orderedIndexOfPlaying--
+        if (playlist.orderedIndexOfPlaying - 1 === -1) {
+          newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.length - 1
+        } else {
+          newPlaylistState.orderedIndexOfPlaying--
+        }
+        newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying]
       }
-      newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying]
+      newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing)
     }
-    newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing)
     dispatch(createSetPlaylistAction(newPlaylistState))
   }
 }
