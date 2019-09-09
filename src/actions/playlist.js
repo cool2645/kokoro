@@ -174,6 +174,9 @@ export function setNextSong (song) {
       ) {
         newPlaylistState.shuffledList.splice(playlist.shuffledIndexOfPlaying + 1, 0, songId)
       }
+      if (newPlaylistState.orderedList.length === 1) {
+        newPlaylistState.playing = newPlaylistState.orderedList[0]
+      }
     }
     dispatch(createSetPlaylistAction(newPlaylistState))
   }

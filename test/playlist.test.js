@@ -580,4 +580,10 @@ describe('playlist state test', () => {
   it('should stop', () => {
     kokoro.ref.dispatchEvent(new Event('error'))
   })
+
+  it('should set current if set next on emptyl list', () => {
+    kokoro.clearPlaylist()
+    kokoro.setNextSong(playlist[0])
+    expect(kokoro.getState().playing.src).toEqual('https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3')
+  })
 })
