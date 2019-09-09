@@ -31,6 +31,10 @@ describe('playlist state test', () => {
       'https://dl.stream.qqmusic.qq.com/M500004TORYk23lbBU.mp3?vkey=&guid=1118732657&fromtag=64'
     ]
   }]
+  const songs = {}
+  playlist.forEach(v => {
+    songs[Song.id(v)] = v
+  })
 
   it('should return initial state at the very first beginning', () => {
     const expectedState = {
@@ -46,49 +50,22 @@ describe('playlist state test', () => {
     expect(kokoro.getState().playlist).toEqual(expectedState)
   })
 
-  it('should accept playlist with and without args', function () {
+  it('should accept playlist with and without args', () => {
     const expectedState = {
-      songs: {
-        'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3': {
-          title: '绿茶',
-          artist: '孙羽幽',
-          src: 'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
-        },
-        'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3': {
-          title: 'あめあかり',
-          artist: 'なぎ',
-          src: 'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3'
-        },
-        'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3': {
-          title: '君だったら',
-          artist: 'HAPPY BIRTHDAY',
-          src: [
-            'https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3',
-            'https://m10.music.126.net/20190907220812/bf90964e93d2ff771c36a7d2d9053972/ymusic/7edf/41ea/0302/6dbeaf542ffb22cf537ab7bef86cd275.mp3'
-          ]
-        },
-        'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3': {
-          title: '聞こえますか',
-          artist: 'HoneyWorks こいぬ',
-          src: [
-            'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-            'https://dl.stream.qqmusic.qq.com/M500004TORYk23lbBU.mp3?vkey=&guid=1118732657&fromtag=64'
-          ]
-        }
-      },
+      songs,
       orderedList: [
-        'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3',
-        'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
-        'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-        'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3'
+        Song.id(playlist[0]),
+        Song.id(playlist[1]),
+        Song.id(playlist[2]),
+        Song.id(playlist[3])
       ],
       orderedIndexOfPlaying: 0,
       shuffledList: [],
       shuffledIndexOfPlaying: null,
       historyList: [
-        'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
+        Song.id(playlist[0])
       ],
-      playing: 'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3',
+      playing: Song.id(playlist[0]),
       playOrder: 'PLAY_ORDER_LOOP'
     }
 
@@ -113,54 +90,27 @@ describe('playlist state test', () => {
     expect(kokoro.getState().playlist).toEqual(expectedState)
   })
 
-  it('should change play order', function () {
+  it('should change play order', () => {
     const expectedState = {
-      songs: {
-        'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3': {
-          title: '绿茶',
-          artist: '孙羽幽',
-          src: 'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
-        },
-        'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3': {
-          title: 'あめあかり',
-          artist: 'なぎ',
-          src: 'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3'
-        },
-        'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3': {
-          title: '君だったら',
-          artist: 'HAPPY BIRTHDAY',
-          src: [
-            'https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3',
-            'https://m10.music.126.net/20190907220812/bf90964e93d2ff771c36a7d2d9053972/ymusic/7edf/41ea/0302/6dbeaf542ffb22cf537ab7bef86cd275.mp3'
-          ]
-        },
-        'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3': {
-          title: '聞こえますか',
-          artist: 'HoneyWorks こいぬ',
-          src: [
-            'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-            'https://dl.stream.qqmusic.qq.com/M500004TORYk23lbBU.mp3?vkey=&guid=1118732657&fromtag=64'
-          ]
-        }
-      },
+      songs,
       orderedList: [
-        'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3',
-        'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
-        'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-        'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3'
+        Song.id(playlist[0]),
+        Song.id(playlist[1]),
+        Song.id(playlist[2]),
+        Song.id(playlist[3])
       ],
       orderedIndexOfPlaying: 1,
       shuffledList: [
-        'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
-        'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-        'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-        'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
+        Song.id(playlist[1]),
+        Song.id(playlist[3]),
+        Song.id(playlist[2]),
+        Song.id(playlist[0])
       ],
       shuffledIndexOfPlaying: 0,
       historyList: [
-        'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3'
+        Song.id(playlist[1])
       ],
-      playing: 'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
+      playing: Song.id(playlist[1]),
       playOrder: 'PLAY_ORDER_SHUFFLE'
     }
     kokoro.nextPlayOrder()
@@ -171,11 +121,11 @@ describe('playlist state test', () => {
 
   it('should previous and next', () => {
     kokoro.previous()
-    expect(kokoro.getState().playlist.playing).toEqual('https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3')
+    expect(kokoro.getState().playlist.playing).toEqual(Song.id(playlist[0]))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(0)
     expect(kokoro.getState().playlist.shuffledIndexOfPlaying).toEqual(3)
     kokoro.next()
-    expect(kokoro.getState().playlist.playing).toEqual('https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3')
+    expect(kokoro.getState().playlist.playing).toEqual(Song.id(playlist[1]))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(1)
     expect(kokoro.getState().playlist.shuffledIndexOfPlaying).toEqual(4)
     kokoro.next()
@@ -187,31 +137,31 @@ describe('playlist state test', () => {
     kokoro.next()
     kokoro.next()
     kokoro.next()
-    expect(kokoro.getState().playlist.playing).toEqual('https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3')
+    expect(kokoro.getState().playlist.playing).toEqual(Song.id(playlist[1]))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(1)
     expect(kokoro.getState().playlist.shuffledIndexOfPlaying).toEqual(12)
     expect(kokoro.getState().playlist.historyList).toEqual([
-      'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
-      'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3',
-      'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-      'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3'
+      Song.id(playlist[1]),
+      Song.id(playlist[0]),
+      Song.id(playlist[2]),
+      Song.id(playlist[3])
     ])
     kokoro.previous()
-    expect(kokoro.getState().playlist.playing).toEqual('https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3')
+    expect(kokoro.getState().playlist.playing).toEqual(Song.id(playlist[0]))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(0)
     expect(kokoro.getState().playlist.shuffledIndexOfPlaying).toEqual(11)
     kokoro.setPlayOrder('PLAY_ORDER_LOOP')
     kokoro.previous()
-    expect(kokoro.getState().playlist.playing).toEqual('https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3')
+    expect(kokoro.getState().playlist.playing).toEqual(Song.id(playlist[3]))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(3)
     kokoro.previous()
-    expect(kokoro.getState().playlist.playing).toEqual('https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3')
+    expect(kokoro.getState().playlist.playing).toEqual(Song.id(playlist[2]))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(2)
     kokoro.next()
-    expect(kokoro.getState().playlist.playing).toEqual('https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3')
+    expect(kokoro.getState().playlist.playing).toEqual(Song.id(playlist[3]))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(3)
     kokoro.next()
-    expect(kokoro.getState().playlist.playing).toEqual('https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3')
+    expect(kokoro.getState().playlist.playing).toEqual(Song.id(playlist[0]))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(0)
   })
 
@@ -222,8 +172,8 @@ describe('playlist state test', () => {
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(2)
     kokoro.ref.dispatchEvent(new Event('error'))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(2)
-    expect(kokoro.ref.src).toEqual('https://m10.music.126.net/20190907220812/bf90964e93d2ff771c36a7d2d9053972/ymusic/7edf/41ea/0302/6dbeaf542ffb22cf537ab7bef86cd275.mp3')
-    expect(kokoro.getState().playing.src).toEqual('https://m10.music.126.net/20190907220812/bf90964e93d2ff771c36a7d2d9053972/ymusic/7edf/41ea/0302/6dbeaf542ffb22cf537ab7bef86cd275.mp3')
+    expect(kokoro.ref.src).toEqual(playlist[2].src[1])
+    expect(kokoro.getState().playing.src).toEqual(playlist[2].src[1])
     expect(kokoro.getState().playing.srcIndex).toEqual(1)
     kokoro.ref.dispatchEvent(new Event('error'))
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(3)
@@ -268,72 +218,38 @@ describe('playlist state test', () => {
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(1)
   })
 
-  it('should remove song', function () {
+  it('should remove song', () => {
     kokoro.removeSong(1)
     kokoro.removeSong(Song.id(playlist[2]))
     kokoro.removeSong(playlist[0])
     let expectedState = {
       player: { volume: 1, speed: 1 },
       playing: {
-        src: 'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
+        src: playlist[3].src[0],
         srcIndex: 0,
-        song: {
-          title: '聞こえますか',
-          artist: 'HoneyWorks こいぬ',
-          src: [
-            'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-            'https://dl.stream.qqmusic.qq.com/M500004TORYk23lbBU.mp3?vkey=&guid=1118732657&fromtag=64'
-          ]
-        },
+        song: playlist[3],
         currentTime: 0,
         totalTime: 0,
         bufferedTime: null,
         paused: false
       },
       playlist: {
-        songs: {
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3': {
-            title: '绿茶',
-            artist: '孙羽幽',
-            src: 'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
-          },
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3': {
-            title: 'あめあかり',
-            artist: 'なぎ',
-            src: 'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3'
-          },
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3': {
-            title: '君だったら',
-            artist: 'HAPPY BIRTHDAY',
-            src: [
-              'https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3',
-              'https://m10.music.126.net/20190907220812/bf90964e93d2ff771c36a7d2d9053972/ymusic/7edf/41ea/0302/6dbeaf542ffb22cf537ab7bef86cd275.mp3'
-            ]
-          },
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3': {
-            title: '聞こえますか',
-            artist: 'HoneyWorks こいぬ',
-            src: [
-              'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-              'https://dl.stream.qqmusic.qq.com/M500004TORYk23lbBU.mp3?vkey=&guid=1118732657&fromtag=64'
-            ]
-          }
-        },
+        songs,
         orderedList: [
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3'
+          Song.id(playlist[3])
         ],
         orderedIndexOfPlaying: 0,
         shuffledList: [
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3'
+          Song.id(playlist[3])
         ],
         shuffledIndexOfPlaying: 0,
         historyList: [
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3',
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3'
+          Song.id(playlist[3]),
+          Song.id(playlist[0]),
+          Song.id(playlist[2]),
+          Song.id(playlist[1])
         ],
-        playing: 'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
+        playing: Song.id(playlist[3]),
         playOrder: 'PLAY_ORDER_SHUFFLE'
       }
     }
@@ -351,43 +267,16 @@ describe('playlist state test', () => {
         paused: false
       },
       playlist: {
-        songs: {
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3': {
-            title: '绿茶',
-            artist: '孙羽幽',
-            src: 'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
-          },
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3': {
-            title: 'あめあかり',
-            artist: 'なぎ',
-            src: 'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3'
-          },
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3': {
-            title: '君だったら',
-            artist: 'HAPPY BIRTHDAY',
-            src: [
-              'https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3',
-              'https://m10.music.126.net/20190907220812/bf90964e93d2ff771c36a7d2d9053972/ymusic/7edf/41ea/0302/6dbeaf542ffb22cf537ab7bef86cd275.mp3'
-            ]
-          },
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3': {
-            title: '聞こえますか',
-            artist: 'HoneyWorks こいぬ',
-            src: [
-              'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-              'https://dl.stream.qqmusic.qq.com/M500004TORYk23lbBU.mp3?vkey=&guid=1118732657&fromtag=64'
-            ]
-          }
-        },
+        songs,
         orderedList: [],
         orderedIndexOfPlaying: 0,
         shuffledList: [],
         shuffledIndexOfPlaying: 0,
         historyList: [
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3',
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3'
+          Song.id(playlist[3]),
+          Song.id(playlist[0]),
+          Song.id(playlist[2]),
+          Song.id(playlist[1])
         ],
         playing: null,
         playOrder: 'PLAY_ORDER_SHUFFLE'
@@ -402,68 +291,34 @@ describe('playlist state test', () => {
     expectedState = {
       player: { volume: 1, speed: 1 },
       playing: {
-        src: 'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
+        src: playlist[3].src[0],
         srcIndex: 0,
-        song: {
-          title: '聞こえますか',
-          artist: 'HoneyWorks こいぬ',
-          src: [
-            'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-            'https://dl.stream.qqmusic.qq.com/M500004TORYk23lbBU.mp3?vkey=&guid=1118732657&fromtag=64'
-          ]
-        },
+        song: playlist[3],
         currentTime: 0,
         totalTime: 0,
         bufferedTime: null,
         paused: false
       },
       playlist: {
-        songs: {
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3': {
-            title: '绿茶',
-            artist: '孙羽幽',
-            src: 'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
-          },
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3': {
-            title: 'あめあかり',
-            artist: 'なぎ',
-            src: 'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3'
-          },
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3': {
-            title: '君だったら',
-            artist: 'HAPPY BIRTHDAY',
-            src: [
-              'https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3',
-              'https://m10.music.126.net/20190907220812/bf90964e93d2ff771c36a7d2d9053972/ymusic/7edf/41ea/0302/6dbeaf542ffb22cf537ab7bef86cd275.mp3'
-            ]
-          },
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3': {
-            title: '聞こえますか',
-            artist: 'HoneyWorks こいぬ',
-            src: [
-              'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-              'https://dl.stream.qqmusic.qq.com/M500004TORYk23lbBU.mp3?vkey=&guid=1118732657&fromtag=64'
-            ]
-          }
-        },
+        songs,
         orderedList: [
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3'
+          Song.id(playlist[3])
         ],
         orderedIndexOfPlaying: 0,
         shuffledList: [
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
+          Song.id(playlist[1]),
+          Song.id(playlist[3]),
+          Song.id(playlist[2]),
+          Song.id(playlist[0])
         ],
         shuffledIndexOfPlaying: 0,
         historyList: [
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
+          Song.id(playlist[3]),
+          Song.id(playlist[2]),
+          Song.id(playlist[1]),
+          Song.id(playlist[0])
         ],
-        playing: 'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
+        playing: Song.id(playlist[3]),
         playOrder: 'PLAY_ORDER_SINGLE'
       }
     }
@@ -481,48 +336,21 @@ describe('playlist state test', () => {
         paused: false
       },
       playlist: {
-        songs: {
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3': {
-            title: '绿茶',
-            artist: '孙羽幽',
-            src: 'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
-          },
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3': {
-            title: 'あめあかり',
-            artist: 'なぎ',
-            src: 'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3'
-          },
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3': {
-            title: '君だったら',
-            artist: 'HAPPY BIRTHDAY',
-            src: [
-              'https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3',
-              'https://m10.music.126.net/20190907220812/bf90964e93d2ff771c36a7d2d9053972/ymusic/7edf/41ea/0302/6dbeaf542ffb22cf537ab7bef86cd275.mp3'
-            ]
-          },
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3': {
-            title: '聞こえますか',
-            artist: 'HoneyWorks こいぬ',
-            src: [
-              'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-              'https://dl.stream.qqmusic.qq.com/M500004TORYk23lbBU.mp3?vkey=&guid=1118732657&fromtag=64'
-            ]
-          }
-        },
+        songs,
         orderedList: [],
         orderedIndexOfPlaying: 0,
         shuffledList: [
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
+          Song.id(playlist[1]),
+          Song.id(playlist[3]),
+          Song.id(playlist[2]),
+          Song.id(playlist[0])
         ],
         shuffledIndexOfPlaying: 0,
         historyList: [
-          'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-          'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-          'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
-          'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
+          Song.id(playlist[3]),
+          Song.id(playlist[2]),
+          Song.id(playlist[1]),
+          Song.id(playlist[0])
         ],
         playing: null,
         playOrder: 'PLAY_ORDER_SINGLE'
@@ -557,23 +385,23 @@ describe('playlist state test', () => {
     kokoro.setPlaylist(playlist, 1, PLAY_ORDER_SHUFFLE)
     kokoro.setNextSong(playlist[3])
     expect(kokoro.getState().playlist.shuffledList).toEqual([
-      'https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3',
-      'https://m10.music.126.net/20190907220851/d84398f2c351b63982b1bcbc66aed7af/ymusic/f48e/d897/54df/59ceadfde02d18cbb90cb445fb904fb5.mp3',
-      'https://tokimekiwakuwaku.netlify.com/HAPPY%20BIRTHDAY%20-%20%E5%90%9B%E3%81%A0%E3%81%A3%E3%81%9F%E3%82%89.mp3',
-      'https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3'
+      Song.id(playlist[1]),
+      Song.id(playlist[3]),
+      Song.id(playlist[2]),
+      Song.id(playlist[0])
     ])
   })
 
   it('should remove song', () => {
     kokoro.setPlaylist(playlist, 0, PLAY_ORDER_SHUFFLE)
     kokoro.removeSong(0)
-    expect(kokoro.getState().playing.src).toEqual('https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3')
+    expect(kokoro.getState().playing.src).toEqual(playlist[2].src[0])
     kokoro.setPlayOrder(PLAY_ORDER_LOOP)
     kokoro.setCurrentSong(2)
     kokoro.removeSong(2)
-    expect(kokoro.getState().playing.src).toEqual('https://tokimekiwakuwaku.netlify.com/HAPPY BIRTHDAY - 君だったら.mp3')
+    expect(kokoro.getState().playing.src).toEqual(playlist[2].src[0])
     kokoro.removeSong(1)
-    expect(kokoro.getState().playing.src).toEqual('https://m10.music.126.net/20190907220739/5b23069fcaf89430a00b6a64f9608a9b/ymusic/995a/cab7/3a80/d97a78d23db5a917fee14073312bb054.mp3')
+    expect(kokoro.getState().playing.src).toEqual(playlist[1].src)
     kokoro.removeSong(0)
     expect(kokoro.getState().playing.src).toEqual('')
   })
@@ -585,7 +413,7 @@ describe('playlist state test', () => {
   it('should set current if set next on emptyl list', () => {
     kokoro.clearPlaylist()
     kokoro.setNextSong(playlist[0])
-    expect(kokoro.getState().playing.src).toEqual('https://m10.music.126.net/20190907220705/18f1879d4223f025cc0f50746741ed18/ymusic/0f5b/075c/015c/8109f4dd6d06939775f0666388a36fbc.mp3')
+    expect(kokoro.getState().playing.src).toEqual(playlist[0].src)
   })
 
   it('should throw no error', () => {
