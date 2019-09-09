@@ -1,7 +1,7 @@
 /*!
  * kokoro - Headless music player written with Redux.
  * --------
- * @version 0.1.0-beta.3
+ * @version 0.1.0-beta.4
  * @homepage: https://github.com/cool2645/kokoro#readme
  * @license MIT
  * @author rikakomoe
@@ -102,7 +102,7 @@ function _nonIterableSpread() {
   throw new TypeError("Invalid attempt to spread non-iterable instance");
 }
 
-var version = "0.1.0-beta.3";
+var version = "0.1.0-beta.4";
 
 var Song =
 /*#__PURE__*/
@@ -240,6 +240,15 @@ function shuffle(original) {
   return shuffled;
 }
 
+function swap(original) {
+  var swapped = _toConsumableArray(original);
+
+  var a = swapped[0];
+  swapped[0] = swapped[swapped.length - 1];
+  swapped[swapped.length - 1] = a;
+  return swapped;
+}
+
 function createSetPlaylistAction(payload) {
   return {
     type: SET_PLAYLIST,
@@ -300,27 +309,36 @@ function next() {
 
     var newPlaylistState = _objectSpread2({}, playlist);
 
-    if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
-      if (playlist.shuffledIndexOfPlaying + 1 === playlist.shuffledList.length) {
-        var _newPlaylistState$shu;
+    if (playlist.orderedList.length) {
+      if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
+        if (playlist.shuffledIndexOfPlaying + 1 === playlist.shuffledList.length) {
+          var _newPlaylistState$shu;
 
-        (_newPlaylistState$shu = newPlaylistState.shuffledList).push.apply(_newPlaylistState$shu, _toConsumableArray(shuffle(playlist.orderedList)));
-      }
+          var newShuffledList = shuffle(playlist.orderedList);
 
-      newPlaylistState.shuffledIndexOfPlaying++;
-      newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying];
-      newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing);
-    } else {
-      if (playlist.orderedIndexOfPlaying + 1 === playlist.orderedList.length) {
-        newPlaylistState.orderedIndexOfPlaying = 0;
+          if (newShuffledList[0] === playlist.shuffledList[playlist.shuffledList.length - 1]) {
+            newShuffledList = swap(newShuffledList);
+          }
+
+          (_newPlaylistState$shu = newPlaylistState.shuffledList).push.apply(_newPlaylistState$shu, _toConsumableArray(newShuffledList));
+        }
+
+        newPlaylistState.shuffledIndexOfPlaying++;
+        newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying];
+        newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing);
       } else {
-        newPlaylistState.orderedIndexOfPlaying++;
+        if (playlist.orderedIndexOfPlaying + 1 >= playlist.orderedList.length) {
+          newPlaylistState.orderedIndexOfPlaying = 0;
+        } else {
+          newPlaylistState.orderedIndexOfPlaying++;
+        }
+
+        newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
       }
 
-      newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
+      newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
     }
 
-    newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
     dispatch(createSetPlaylistAction(newPlaylistState));
   };
 }
@@ -343,29 +361,38 @@ function previous() {
 
     var newPlaylistState = _objectSpread2({}, playlist);
 
-    if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
-      if (playlist.shuffledIndexOfPlaying - 1 === -1) {
-        var _newPlaylistState$shu2;
+    if (playlist.orderedList.length) {
+      if (playlist.playOrder === PLAY_ORDER_SHUFFLE) {
+        if (playlist.shuffledIndexOfPlaying - 1 === -1) {
+          var _newPlaylistState$shu2;
 
-        (_newPlaylistState$shu2 = newPlaylistState.shuffledList).unshift.apply(_newPlaylistState$shu2, _toConsumableArray(shuffle(playlist.orderedList)));
+          var newShuffledList = shuffle(playlist.orderedList);
 
-        newPlaylistState.shuffledIndexOfPlaying += playlist.orderedList.length;
-      }
+          if (newShuffledList[newShuffledList.length - 1] === playlist.shuffledList[0]) {
+            newShuffledList = swap(newShuffledList);
+          }
 
-      newPlaylistState.shuffledIndexOfPlaying--;
-      newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying];
-      newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing);
-    } else {
-      if (playlist.orderedIndexOfPlaying - 1 === -1) {
-        newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.length - 1;
+          (_newPlaylistState$shu2 = newPlaylistState.shuffledList).unshift.apply(_newPlaylistState$shu2, _toConsumableArray(newShuffledList));
+
+          newPlaylistState.shuffledIndexOfPlaying += newShuffledList.length;
+        }
+
+        newPlaylistState.shuffledIndexOfPlaying--;
+        newPlaylistState.playing = newPlaylistState.shuffledList[newPlaylistState.shuffledIndexOfPlaying];
+        newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.indexOf(newPlaylistState.playing);
       } else {
-        newPlaylistState.orderedIndexOfPlaying--;
+        if (playlist.orderedIndexOfPlaying - 1 === -1) {
+          newPlaylistState.orderedIndexOfPlaying = playlist.orderedList.length - 1;
+        } else {
+          newPlaylistState.orderedIndexOfPlaying--;
+        }
+
+        newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
       }
 
-      newPlaylistState.playing = newPlaylistState.orderedList[newPlaylistState.orderedIndexOfPlaying];
+      newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
     }
 
-    newPlaylistState.historyList = pushHistory(playlist.historyList, newPlaylistState.playing);
     dispatch(createSetPlaylistAction(newPlaylistState));
   };
 }
@@ -433,6 +460,10 @@ function setNextSong(song) {
         newPlaylistState.orderedList.splice(newPlaylistState.orderedIndexOfPlaying + 1, 0, songId);
       } else if (playlist.playOrder === PLAY_ORDER_SHUFFLE && !(playlist.shuffledIndexOfPlaying + 1 < playlist.shuffledList.length && playlist.shuffledList[playlist.shuffledIndexOfPlaying + 1] === songId)) {
         newPlaylistState.shuffledList.splice(playlist.shuffledIndexOfPlaying + 1, 0, songId);
+      }
+
+      if (newPlaylistState.orderedList.length === 1) {
+        newPlaylistState.playing = newPlaylistState.orderedList[0];
       }
     }
 
