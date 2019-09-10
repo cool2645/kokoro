@@ -5,6 +5,7 @@ export const SET_TOTAL_TIME = 'SET_TOTAL_TIME'
 export const SET_BUFFERED_TIME = 'SET_BUFFERED_TIME'
 export const SET_TIMES = 'SET_TIMES'
 export const NEXT_SRC = 'NEXT_SRC'
+export const UPDATE_SONG = 'UPDATE_SONG'
 
 export function pause () {
   return {
@@ -49,5 +50,12 @@ export function setTimes (times) {
 export function nextSrc () {
   return {
     type: NEXT_SRC
+  }
+}
+
+export function updateSong (song) {
+  return {
+    type: UPDATE_SONG,
+    payload: song
   }
 }

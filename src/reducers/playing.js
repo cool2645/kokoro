@@ -1,4 +1,4 @@
-import { cloneDeep } from '../helpers'
+import { cloneDeep, Song } from '../helpers'
 import {
   CLEAR_PLAYLIST,
   NEXT_SRC,
@@ -7,7 +7,7 @@ import {
   SET_BUFFERED_TIME,
   SET_CURRENT_TIME,
   SET_PLAYLIST, SET_TIMES,
-  SET_TOTAL_TIME
+  SET_TOTAL_TIME, UPDATE_SONG
 } from '../actions'
 
 const initialState = {
@@ -38,20 +38,21 @@ export default function (state = initialState, action) {
           : '',
         srcIndex: 0
       }
+    case UPDATE_SONG:
+      return {
+        ...state,
+        song: state.song
+          ? Song.id(state.song) === Song.id(action.payload)
+            ? cloneDeep(action.payload) : cloneDeep(state.song)
+          : null
+      }
     case NEXT_SRC: {
-      // condition is always true
-      // const srcId = state.song.src instanceof Array
-      //  ? state.srcIndex + 1 < state.song.src.length
-      //    ? state.srcIndex + 1 : 0
-      //  : 0
       const srcId = state.srcIndex + 1
-      // if (srcId !== state.srcIndex && state.song.src instanceof Array) {
       return {
         ...cloneDeep(state),
         srcIndex: srcId,
         src: state.song.src[srcId]
       }
-      // } else return state
     }
     case SET_CURRENT_TIME:
       return {

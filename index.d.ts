@@ -42,6 +42,7 @@ export declare class Kokoro {
   removeSong (song: ISong | number | string): void
   setPlaylist (songs: ISong[], currentSong?: ISong | number | string, playOrder?: IPlayOrder): void
   clearPlaylist (): void
+  updateSong (song: ISong): void
   setVolume (volume: number): void
   setSpeed (speedRate: number): void
 }
@@ -130,6 +131,7 @@ export namespace actions {
   export const SET_BUFFERED_TIME = 'SET_BUFFERED_TIME'
   export const SET_TIMES = 'SET_TIMES'
   export const NEXT_SRC = 'NEXT_SRC'
+  export const UPDATE_SONG = 'UPDATE_SONG'
 
   export const SET_PLAYLIST = 'SET_PLAYLIST'
   export const CLEAR_PLAYLIST = 'CLEAR_PLAYLIST'
@@ -148,7 +150,8 @@ export namespace actions {
   export function setTotalTime (time: number): IAction<typeof SET_TOTAL_TIME, number>
   export function setBufferedTime (buffered: ITimeRanges): IAction<typeof SET_BUFFERED_TIME, ITimeRanges>
   export function setTimes(times: ITimes): IAction<typeof SET_TIMES, ITimes>
-  export function nextSrc() : IAction<typeof NEXT_SRC, undefined>
+  export function nextSrc(): IAction<typeof NEXT_SRC, undefined>
+  export function updateSong (song: ISong): IAction<typeof UPDATE_SONG, ISong>
   export function next (): ThunkAction<undefined, IState, undefined, IAction<typeof SET_PLAYLIST, IPlaylistState>>
   export function autoNext (): ThunkAction<undefined, IState, undefined, IAction<typeof SET_PLAYLIST, IPlaylistState>>
   export function previous (): ThunkAction<undefined, IState, undefined, IAction<typeof SET_PLAYLIST, IPlaylistState>>

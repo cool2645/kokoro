@@ -13,7 +13,7 @@ import {
   setPlaylist, setPlayOrder,
   setSpeed, setTimes,
   setTotalTime,
-  setVolume
+  setVolume, updateSong
 } from './actions'
 import { Song, TimeRanges } from './helpers'
 
@@ -234,6 +234,10 @@ export class Kokoro {
   clearPlaylist () {
     this._dispatch(clearPlaylist())
     this._onSrcProbablyChanged()
+  }
+
+  updateSong (song) {
+    this._dispatch(updateSong(song))
   }
 
   setVolume (volume) {
