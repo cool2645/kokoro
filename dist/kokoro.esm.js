@@ -1,7 +1,7 @@
 /*!
  * kokoro - Headless music player written with Redux.
  * --------
- * @version 0.1.0-beta.4
+ * @version 0.1.0-beta.5
  * @homepage: https://github.com/cool2645/kokoro#readme
  * @license MIT
  * @author rikakomoe
@@ -102,7 +102,7 @@ function _nonIterableSpread() {
   throw new TypeError("Invalid attempt to spread non-iterable instance");
 }
 
-var version = "0.1.0-beta.4";
+var version = "0.1.0-beta.5";
 
 var Song =
 /*#__PURE__*/
@@ -183,6 +183,7 @@ var SET_TOTAL_TIME = 'SET_TOTAL_TIME';
 var SET_BUFFERED_TIME = 'SET_BUFFERED_TIME';
 var SET_TIMES = 'SET_TIMES';
 var NEXT_SRC = 'NEXT_SRC';
+var UPDATE_SONG = 'UPDATE_SONG';
 function pause() {
   return {
     type: PAUSE
@@ -220,6 +221,12 @@ function setTimes(times) {
 function nextSrc() {
   return {
     type: NEXT_SRC
+  };
+}
+function updateSong(song) {
+  return {
+    type: UPDATE_SONG,
+    payload: song
   };
 }
 
@@ -626,6 +633,7 @@ var index = /*#__PURE__*/Object.freeze({
   SET_BUFFERED_TIME: SET_BUFFERED_TIME,
   SET_TIMES: SET_TIMES,
   NEXT_SRC: NEXT_SRC,
+  UPDATE_SONG: UPDATE_SONG,
   pause: pause,
   play: play,
   setCurrentTime: setCurrentTime,
@@ -633,6 +641,7 @@ var index = /*#__PURE__*/Object.freeze({
   setBufferedTime: setBufferedTime,
   setTimes: setTimes,
   nextSrc: nextSrc,
+  updateSong: updateSong,
   SET_PLAYLIST: SET_PLAYLIST,
   CLEAR_PLAYLIST: CLEAR_PLAYLIST,
   setPlayOrder: setPlayOrder,
@@ -689,6 +698,16 @@ function playlist () {
     case SET_PLAYLIST:
       return cloneDeep(action.payload);
 
+    case UPDATE_SONG:
+      {
+        var newSong = cloneDeep(action.payload);
+        var newSongs = cloneDeep(state.songs);
+        newSongs[Song.id(newSong)] = newSong;
+        return _objectSpread2({}, cloneDeep(state), {
+          songs: newSongs
+        });
+      }
+
     case CLEAR_PLAYLIST:
       return _objectSpread2({}, cloneDeep(initialState$1), {
         playOrder: state.playOrder
@@ -723,19 +742,17 @@ function playing () {
         srcIndex: 0
       });
 
+    case UPDATE_SONG:
+      return _objectSpread2({}, state, {
+        song: state.song ? Song.id(state.song) === Song.id(action.payload) ? cloneDeep(action.payload) : cloneDeep(state.song) : null
+      });
+
     case NEXT_SRC:
       {
-        // condition is always true
-        // const srcId = state.song.src instanceof Array
-        //  ? state.srcIndex + 1 < state.song.src.length
-        //    ? state.srcIndex + 1 : 0
-        //  : 0
-        var srcId = state.srcIndex + 1; // if (srcId !== state.srcIndex && state.song.src instanceof Array) {
-
+        var srcId = state.srcIndex + 1;
         return _objectSpread2({}, cloneDeep(state), {
           srcIndex: srcId,
-          src: state.song.src[srcId] // } else return state
-
+          src: state.song.src[srcId]
         });
       }
 
@@ -1109,6 +1126,11 @@ function () {
       this._dispatch(clearPlaylist());
 
       this._onSrcProbablyChanged();
+    }
+  }, {
+    key: "updateSong",
+    value: function updateSong$1(song) {
+      this._dispatch(updateSong(song));
     }
   }, {
     key: "setVolume",
