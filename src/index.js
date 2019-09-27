@@ -73,7 +73,7 @@ export class Kokoro {
         this._dispatch(autoNext())
       }
       this._onSrcProbablyChanged()
-      this._triggerPlay()
+      if (!state.playing.paused) this._triggerPlay()
     })
     this._ref.addEventListener('loadedmetadata', () => {
       this._dispatch(setTotalTime(this._ref.duration))

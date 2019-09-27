@@ -887,7 +887,7 @@ function () {
 
       _this._onSrcProbablyChanged();
 
-      _this._triggerPlay();
+      if (!state.playing.paused) _this._triggerPlay();
     });
 
     this._ref.addEventListener('loadedmetadata', function () {
