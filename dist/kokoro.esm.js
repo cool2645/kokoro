@@ -1,7 +1,7 @@
 /*!
- * kokoro - Headless music player written with Redux.
+ * kokoro - Headless music player written with redux.
  * --------
- * @version 0.1.0-beta.5
+ * @version 0.1.0-beta.6
  * @homepage: https://github.com/cool2645/kokoro#readme
  * @license MIT
  * @author rikakomoe
@@ -102,7 +102,7 @@ function _nonIterableSpread() {
   throw new TypeError("Invalid attempt to spread non-iterable instance");
 }
 
-var version = "0.1.0-beta.5";
+var version = "0.1.0-beta.6";
 
 var Song =
 /*#__PURE__*/
