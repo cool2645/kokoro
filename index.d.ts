@@ -47,14 +47,18 @@ export declare class Kokoro {
   setSpeed (speedRate: number): void
 }
 
-export interface ILyrics {
+interface ILyricsBase {
+  value: string
+}
+
+export interface ILyrics extends ILyricsBase {
   type?: string
-  text: string
-  translation?: {
-    text: string
-    lang: string
-    name: string
-  }[]
+  translation?: ILyricsTranslation[]
+}
+
+export interface ILyricsTranslation extends ILyricsBase {
+  lang: string
+  name: string
 }
 
 export interface ISong {
