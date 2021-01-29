@@ -219,6 +219,7 @@ export class Kokoro {
 
   setNextSong (song) {
     this._dispatch(setNextSong(song))
+    this._onSrcProbablyChanged()
   }
 
   removeSong (song) {

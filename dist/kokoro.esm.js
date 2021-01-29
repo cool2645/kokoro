@@ -67,13 +67,13 @@ function _objectSpread2(target) {
     var source = arguments[i] != null ? arguments[i] : {};
 
     if (i % 2) {
-      ownKeys(source, true).forEach(function (key) {
+      ownKeys(Object(source), true).forEach(function (key) {
         _defineProperty(target, key, source[key]);
       });
     } else if (Object.getOwnPropertyDescriptors) {
       Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
     } else {
-      ownKeys(source).forEach(function (key) {
+      ownKeys(Object(source)).forEach(function (key) {
         Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
       });
     }
@@ -83,30 +83,98 @@ function _objectSpread2(target) {
 }
 
 function _toConsumableArray(arr) {
-  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
 }
 
 function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-    return arr2;
-  }
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
 }
 
 function _iterableToArray(iter) {
-  if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+  return arr2;
 }
 
 function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance");
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _createForOfIteratorHelper(o, allowArrayLike) {
+  var it;
+
+  if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {
+    if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+      if (it) o = it;
+      var i = 0;
+
+      var F = function () {};
+
+      return {
+        s: F,
+        n: function () {
+          if (i >= o.length) return {
+            done: true
+          };
+          return {
+            done: false,
+            value: o[i++]
+          };
+        },
+        e: function (e) {
+          throw e;
+        },
+        f: F
+      };
+    }
+
+    throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+
+  var normalCompletion = true,
+      didErr = false,
+      err;
+  return {
+    s: function () {
+      it = o[Symbol.iterator]();
+    },
+    n: function () {
+      var step = it.next();
+      normalCompletion = step.done;
+      return step;
+    },
+    e: function (e) {
+      didErr = true;
+      err = e;
+    },
+    f: function () {
+      try {
+        if (!normalCompletion && it.return != null) it.return();
+      } finally {
+        if (didErr) throw err;
+      }
+    }
+  };
 }
 
 var version = "0.1.0-beta.7";
 
-var Song =
-/*#__PURE__*/
-function () {
+var Song = /*#__PURE__*/function () {
   function Song() {
     _classCallCheck(this, Song);
   }
@@ -128,9 +196,7 @@ function () {
 
   return Song;
 }();
-var TimeRanges =
-/*#__PURE__*/
-function () {
+var TimeRanges = /*#__PURE__*/function () {
   function TimeRanges() {
     _classCallCheck(this, TimeRanges);
   }
@@ -156,6 +222,7 @@ function cloneDeep(obj) {
 }
 
 var helpers = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   Song: Song,
   TimeRanges: TimeRanges,
   cloneDeep: cloneDeep
@@ -283,7 +350,7 @@ function setPlayOrder(playOrder) {
     var _getState = getState(),
         playlist = _getState.playlist;
 
-    var newPlaylistState = _objectSpread2({}, playlist, {
+    var newPlaylistState = _objectSpread2(_objectSpread2({}, playlist), {}, {
       playOrder: playOrder
     });
 
@@ -533,7 +600,7 @@ function setPlaylist(songs, currentSong, playOrder) {
     var _getState9 = getState(),
         playlist = _getState9.playlist;
 
-    var newPlaylistState = _objectSpread2({}, playlist, {
+    var newPlaylistState = _objectSpread2(_objectSpread2({}, playlist), {}, {
       songs: {},
       orderedList: [],
       orderedIndexOfPlaying: null,
@@ -543,12 +610,11 @@ function setPlaylist(songs, currentSong, playOrder) {
       playOrder: playOrder || playlist.playOrder
     });
 
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
+    var _iterator = _createForOfIteratorHelper(songs),
+        _step;
 
     try {
-      for (var _iterator = songs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var song = _step.value;
 
         var _songId = Song.id(song);
@@ -557,18 +623,9 @@ function setPlaylist(songs, currentSong, playOrder) {
         newPlaylistState.orderedList.push(_songId);
       }
     } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
+      _iterator.e(err);
     } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-          _iterator["return"]();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
-      }
+      _iterator.f();
     }
 
     if (newPlaylistState.orderedList.length) {
@@ -622,6 +679,7 @@ function clearPlaylist() {
 
 
 var index = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   SET_VOLUME: SET_VOLUME,
   SET_SPEED: SET_SPEED,
   setVolume: setVolume,
@@ -666,12 +724,12 @@ function player () {
 
   switch (action.type) {
     case SET_VOLUME:
-      return _objectSpread2({}, state, {
+      return _objectSpread2(_objectSpread2({}, state), {}, {
         volume: action.payload
       });
 
     case SET_SPEED:
-      return _objectSpread2({}, state, {
+      return _objectSpread2(_objectSpread2({}, state), {}, {
         speed: action.payload
       });
 
@@ -703,13 +761,13 @@ function playlist () {
         var newSong = cloneDeep(action.payload);
         var newSongs = cloneDeep(state.songs);
         newSongs[Song.id(newSong)] = newSong;
-        return _objectSpread2({}, cloneDeep(state), {
+        return _objectSpread2(_objectSpread2({}, cloneDeep(state)), {}, {
           songs: newSongs
         });
       }
 
     case CLEAR_PLAYLIST:
-      return _objectSpread2({}, cloneDeep(initialState$1), {
+      return _objectSpread2(_objectSpread2({}, cloneDeep(initialState$1)), {}, {
         playOrder: state.playOrder
       });
 
@@ -736,55 +794,55 @@ function playing () {
       return cloneDeep(initialState$2);
 
     case SET_PLAYLIST:
-      return _objectSpread2({}, state, {
+      return _objectSpread2(_objectSpread2({}, state), {}, {
         song: action.payload.playing ? cloneDeep(action.payload.songs[action.payload.playing]) : null,
         src: action.payload.playing ? action.payload.songs[action.payload.playing].src instanceof Array ? action.payload.songs[action.payload.playing].src[0] : action.payload.songs[action.payload.playing].src : '',
         srcIndex: 0
       });
 
     case UPDATE_SONG:
-      return _objectSpread2({}, state, {
+      return _objectSpread2(_objectSpread2({}, state), {}, {
         song: state.song ? Song.id(state.song) === Song.id(action.payload) ? cloneDeep(action.payload) : cloneDeep(state.song) : null
       });
 
     case NEXT_SRC:
       {
         var srcId = state.srcIndex + 1;
-        return _objectSpread2({}, cloneDeep(state), {
+        return _objectSpread2(_objectSpread2({}, cloneDeep(state)), {}, {
           srcIndex: srcId,
           src: state.song.src[srcId]
         });
       }
 
     case SET_CURRENT_TIME:
-      return _objectSpread2({}, cloneDeep(state), {
+      return _objectSpread2(_objectSpread2({}, cloneDeep(state)), {}, {
         currentTime: action.payload
       });
 
     case SET_TOTAL_TIME:
-      return _objectSpread2({}, cloneDeep(state), {
+      return _objectSpread2(_objectSpread2({}, cloneDeep(state)), {}, {
         totalTime: action.payload
       });
 
     case SET_BUFFERED_TIME:
-      return _objectSpread2({}, cloneDeep(state), {
+      return _objectSpread2(_objectSpread2({}, cloneDeep(state)), {}, {
         bufferedTime: cloneDeep(action.payload)
       });
 
     case SET_TIMES:
-      return _objectSpread2({}, cloneDeep(state), {
+      return _objectSpread2(_objectSpread2({}, cloneDeep(state)), {}, {
         currentTime: action.payload.currentTime,
         totalTime: action.payload.totalTime,
         bufferedTime: cloneDeep(action.payload.bufferedTime)
       });
 
     case PAUSE:
-      return _objectSpread2({}, cloneDeep(state), {
+      return _objectSpread2(_objectSpread2({}, cloneDeep(state)), {}, {
         paused: true
       });
 
     case PLAY:
-      return _objectSpread2({}, cloneDeep(state), {
+      return _objectSpread2(_objectSpread2({}, cloneDeep(state)), {}, {
         paused: false
       });
 
@@ -811,9 +869,7 @@ function loadState(state) {
   return importedState;
 }
 
-var Kokoro =
-/*#__PURE__*/
-function () {
+var Kokoro = /*#__PURE__*/function () {
   _createClass(Kokoro, [{
     key: "ref",
     get: function get() {
@@ -929,28 +985,19 @@ function () {
     key: "destroy",
     value: function destroy() {
       this._destroyed = true;
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+
+      var _iterator = _createForOfIteratorHelper(this._listeners),
+          _step;
 
       try {
-        for (var _iterator = this._listeners[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var item = _step.value;
           item.unsub();
         }
       } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
+        _iterator.e(err);
       } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-            _iterator["return"]();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
+        _iterator.f();
       }
 
       this._listeners = [];
@@ -1105,6 +1152,8 @@ function () {
     key: "setNextSong",
     value: function setNextSong$1(song) {
       this._dispatch(setNextSong(song));
+
+      this._onSrcProbablyChanged();
     }
   }, {
     key: "removeSong",
