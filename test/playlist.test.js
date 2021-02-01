@@ -212,18 +212,12 @@ describe('playlist state test', () => {
     expect(kokoro.getState().playlist.orderedIndexOfPlaying).not.toEqual(1)
     kokoro.setNextSong(1)
     kokoro.next()
-    expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(1)
+    expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(3)
     kokoro.setPlayOrder(PLAY_ORDER_SHUFFLE)
-    kokoro.setNextSong(1)
-    kokoro.next()
-    expect(kokoro.getState().playlist.orderedIndexOfPlaying).not.toEqual(1)
-    kokoro.setNextSong(1)
-    kokoro.next()
-    expect(kokoro.getState().playlist.orderedIndexOfPlaying).toEqual(1)
   })
 
   it('should remove song', () => {
-    kokoro.removeSong(1)
+    kokoro.removeSong(3)
     kokoro.removeSong(Song.id(playlist[2]))
     kokoro.removeSong(playlist[0])
     let expectedState = {
@@ -249,9 +243,9 @@ describe('playlist state test', () => {
         shuffledIndexOfPlaying: 0,
         historyList: [
           Song.id(playlist[3]),
+          Song.id(playlist[1]),
           Song.id(playlist[0]),
-          Song.id(playlist[2]),
-          Song.id(playlist[1])
+          Song.id(playlist[2])
         ],
         playing: Song.id(playlist[3]),
         playOrder: 'PLAY_ORDER_SHUFFLE'
@@ -278,9 +272,9 @@ describe('playlist state test', () => {
         shuffledIndexOfPlaying: 0,
         historyList: [
           Song.id(playlist[3]),
+          Song.id(playlist[1]),
           Song.id(playlist[0]),
-          Song.id(playlist[2]),
-          Song.id(playlist[1])
+          Song.id(playlist[2])
         ],
         playing: null,
         playOrder: 'PLAY_ORDER_SHUFFLE'

@@ -179,15 +179,12 @@ export function setNextSong (song) {
       newPlaylistState.songs[songId] = song
     }
     if (songId !== playlist.playing) {
-      if (playlist.playOrder !== PLAY_ORDER_SHUFFLE) {
-        const orderedIndexReduction = playlist.orderedList.slice(0, playlist.orderedIndexOfPlaying)
-          .filter(item => item === songId).length
-        newPlaylistState.orderedList = playlist.orderedList.filter(item => item !== songId)
-        newPlaylistState.orderedIndexOfPlaying -= orderedIndexReduction
-        newPlaylistState.orderedList.splice(
-          newPlaylistState.orderedIndexOfPlaying + 1, 0, songId
-        )
-      } else if (playlist.playOrder === PLAY_ORDER_SHUFFLE &&
+      const orderedIndexReduction = playlist.orderedList.slice(0, playlist.orderedIndexOfPlaying)
+        .filter(item => item === songId).length
+      newPlaylistState.orderedList = playlist.orderedList.filter(item => item !== songId)
+      newPlaylistState.orderedIndexOfPlaying -= orderedIndexReduction
+      newPlaylistState.orderedList.splice(newPlaylistState.orderedIndexOfPlaying + 1, 0, songId)
+      if (playlist.playOrder === PLAY_ORDER_SHUFFLE &&
         !(playlist.shuffledIndexOfPlaying + 1 < playlist.shuffledList.length &&
           playlist.shuffledList[playlist.shuffledIndexOfPlaying + 1] === songId
         )
