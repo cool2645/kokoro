@@ -1,7 +1,7 @@
 /*!
  * kokoro - Headless music player written with redux.
  * --------
- * @version 0.1.0-beta.9
+ * @version 0.1.0-beta.10
  * @homepage: https://github.com/cool2645/kokoro#readme
  * @license MIT
  * @author rikakomoe
@@ -172,7 +172,7 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
   };
 }
 
-var version = "0.1.0-beta.9";
+var version = "0.1.0-beta.10";
 
 var Song = /*#__PURE__*/function () {
   function Song() {
