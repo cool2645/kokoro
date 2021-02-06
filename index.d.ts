@@ -53,7 +53,7 @@ interface ILyricsBase {
 
 export interface ILyrics extends ILyricsBase {
   type?: string
-  translation?: ILyricsTranslation[]
+  translations?: ILyricsTranslation[]
 }
 
 export interface ILyricsTranslation extends ILyricsBase {
