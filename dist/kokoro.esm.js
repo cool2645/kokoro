@@ -1,7 +1,7 @@
 /*!
  * kokoro - Headless music player written with redux.
  * --------
- * @version 0.1.0-beta.10
+ * @version 1.0.0
  * @homepage: https://github.com/cool2645/kokoro#readme
  * @license MIT
  * @author rikakomoe
@@ -172,7 +172,7 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
   };
 }
 
-var version = "0.1.0-beta.10";
+var version = "1.0.0";
 
 var Song = /*#__PURE__*/function () {
   function Song() {
@@ -870,38 +870,6 @@ function loadState(state) {
 }
 
 var Kokoro = /*#__PURE__*/function () {
-  _createClass(Kokoro, [{
-    key: "ref",
-    get: function get() {
-      return this._ref;
-    }
-  }, {
-    key: "store",
-    get: function get() {
-      return this._store;
-    }
-  }, {
-    key: "_dispatch",
-    get: function get() {
-      return this._store.dispatch;
-    }
-  }, {
-    key: "getState",
-    get: function get() {
-      return this._store.getState;
-    }
-  }, {
-    key: "destroyed",
-    get: function get() {
-      return this._destroyed || false;
-    }
-  }, {
-    key: "version",
-    get: function get() {
-      return version;
-    }
-  }]);
-
   function Kokoro(initializeState) {
     var _this = this;
 
@@ -982,6 +950,36 @@ var Kokoro = /*#__PURE__*/function () {
   }
 
   _createClass(Kokoro, [{
+    key: "ref",
+    get: function get() {
+      return this._ref;
+    }
+  }, {
+    key: "store",
+    get: function get() {
+      return this._store;
+    }
+  }, {
+    key: "_dispatch",
+    get: function get() {
+      return this._store.dispatch;
+    }
+  }, {
+    key: "getState",
+    get: function get() {
+      return this._store.getState;
+    }
+  }, {
+    key: "destroyed",
+    get: function get() {
+      return this._destroyed || false;
+    }
+  }, {
+    key: "version",
+    get: function get() {
+      return version;
+    }
+  }, {
     key: "destroy",
     value: function destroy() {
       this._destroyed = true;
