@@ -20,7 +20,7 @@ Visit it [here](https://kokoro.js.org).
 2. Open console.
 3. Copy and paste the following code snippet.
     ```javascript
-    let script = document.createElement('script')
+    const script = document.createElement('script')
     script.src = '/dist/kokoro.min.js'
     script.onload = () => {
       window.player = new Kokoro()
@@ -28,7 +28,7 @@ Visit it [here](https://kokoro.js.org).
     }
     document.body.appendChild(script)
     ```
-4. You're ready to go now! Look up to kokoro's [API](https://kokoro.js.org/classes/kokoro.html)
+4. You're ready to go now! Look up to Kokoro's [API](https://kokoro.js.org/classes/kokoro.html)
 and try to play a song.
 
 ## 💡 FAQ
@@ -50,16 +50,16 @@ no matter how many UI components, by what library, when and where are those comp
 
 **Q: But how could I use without a UI?**
 
-We provide an UI library that works with kokoro seamlessly,
+We also provide a "headful" version bundled with kokoro,
 check it out [here](https://github.com/cool2645/kokoro-player).
 
 Note that it's not necessary to use kokoro with [kokoro-player](https://github.com/cool2645/kokoro-player),
 you can use whatever UI you want, or you can just simply use kokoro in a programmatic way.
 
-**Q: All of those UI in existence suck, can I carve my own UI?**
+**Q: I don't like those existing UIs, can I make my own UI?**
 
 Sure. Check out kokoro's [API documentation](https://kokoro.js.org), you'll find it super easy.
 If you're familiar with [redux](https://redux.js.org), it'll be more than easy.
 
-You're welcomed to share your own UI, your link can be added to this README.
+You're welcomed to share your UI, your link can be added to this README.
 Feel free to file an issue or make a pull request.
